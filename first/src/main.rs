@@ -31,5 +31,6 @@ fn time_now() -> Json<Timestamp> {
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![index, time_now]).launch();
+        .mount("/", routes![index, time_now])
+        .launch();
 }

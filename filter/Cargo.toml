@@ -1,0 +1,7 @@
+[package]
+name = "filter"
+version = "0.1.0"
+authors = ["Andrii Tsvielodub <andrey@zoomdata.com>"]
+
+[dependencies]
+hound = "3.3.0"

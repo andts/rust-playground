@@ -1,0 +1,8025 @@
+JSON_API_common_syntax = {
+    JSON_context_item ~ comma ~ JSON_path_specification ~ 
+    (^"AS" ~ JSON_table_path_name)? ~ ( JSON_passing_clause )?
+  }
+
+JSON_aggregate_function = {
+    JSON_object_aggregate_constructor
+  | JSON_array_aggregate_constructor
+  }
+
+JSON_argument = {
+    JSON_value_expression ~ ^"AS" ~ identifier
+  }
+
+JSON_array_aggregate_constructor = {
+    ^"JSON_ARRAYAGG" ~ left_paren ~ JSON_value_expression ~
+    ( JSON_array_aggregate_order_by_clause )? ~
+    ( JSON_constructor_null_clause )? ~ ( JSON_output_clause )? ~ right_paren
+  }
+
+JSON_array_aggregate_order_by_clause = {
+    ^"ORDER" ~ ^"BY" ~ sort_specification_list
+  }
+
+JSON_array_constructor = {
+    JSON_array_constructor_by_enumeration
+  | JSON_array_constructor_by_query
+  }
+
+JSON_array_constructor_by_enumeration = {
+    ^"JSON_ARRAY" ~ left_paren ~
+    ( JSON_value_expression ~ (comma ~ JSON_value_expression)* ~ ( JSON_constructor_null_clause )? )? ~
+    ( JSON_output_clause )? ~ right_paren
+  }
+
+JSON_array_constructor_by_query = {
+    ^"JSON_ARRAY" ~ left_paren ~ query_expression ~ ( JSON_input_clause )? ~
+    ( JSON_constructor_null_clause )? ~ ( JSON_output_clause )? ~ right_paren
+  }
+
+JSON_constructor_null_clause = {
+    (^"NULL" ~ ^"ON" ~ ^"NULL") | (^"ABSENT" ~ ^"ON" ~ ^"NULL")
+  }
+
+JSON_context_item = {
+    JSON_value_expression
+  }
+
+JSON_exists_error_behavior = {
+    ^"TRUE"
+  | ^"FALSE"
+  | ^"UNKNOWN"
+  | ^"ERROR"
+  }
+
+JSON_exists_predicate = {
+    ^"JSON_EXISTS" ~ left_paren ~ JSON_API_common_syntax ~
+    ( JSON_exists_error_behavior ~ ^"ON" ~ ^"ERROR" )? ~ right_paren
+  }
+
+JSON_input_clause = {
+    ^"FORMAT" ~ JSON_representation
+  }
+
+JSON_key_uniqueness_constraint = {
+    ^"WITH" ~ ^"UNIQUE" ~ ( ^"KEYS" )?
+  | ^"WITHOUT" ~ ^"UNIQUE" ~ ( ^"KEYS" )?
+  }
+
+JSON_name = {
+    character_value_expression
+  }
+
+JSON_name_and_value = {
+    ( ^"KEY" )? ~ JSON_name ~ ^"VALUE" ~ JSON_value_expression
+  | JSON_name ~ colon ~ JSON_value_expression
+  }
+
+JSON_object_aggregate_constructor = {
+    ^"JSON_OBJECTAGG" ~ left_paren ~ JSON_name_and_value ~
+    ( JSON_constructor_null_clause )? ~ ( JSON_key_uniqueness_constraint )? ~
+    ( JSON_output_clause )? ~ right_paren
+  }
+
+JSON_object_constructor = {
+    ^"JSON_OBJECT" ~ left_paren ~
+    ( JSON_name_and_value ~ (comma ~ JSON_name_and_value)* ~ ( JSON_constructor_null_clause )? ~ ( JSON_key_uniqueness_constraint )? )? ~
+    ( JSON_output_clause )? ~ right_paren
+  }
+
+JSON_output_clause = {
+    ^"RETURNING" ~ data_type ~ ( ^"FORMAT" ~ JSON_representation )?
+  }
+
+JSON_passing_clause = {
+    ^"PASSING" ~ JSON_argument ~ (comma ~ JSON_argument)*
+  }
+
+JSON_path_specification = {
+    character_string_literal
+  }
+
+JSON_predicate = {
+    string_value_expression ~ ( JSON_input_clause )? ~ ^"IS" ~ ( ^"NOT" )? ~ ^"JSON" ~
+    ( JSON_predicate_type_constraint )? ~ ( JSON_key_uniqueness_constraint )?
+  }
+
+JSON_predicate_type_constraint = {
+    ^"VALUE"
+  | ^"ARRAY"
+  | ^"OBJECT"
+  | ^"SCALAR"
+  }
+
+JSON_query = {
+    ^"JSON_QUERY" ~ left_paren ~ JSON_API_common_syntax ~ ( JSON_output_clause )? ~
+    ( JSON_query_wrapper_behavior ~ ^"WRAPPER" )? ~
+    ( JSON_query_quotes_behavior ~ ^"QUOTES" ~ ( ^"ON" ~ ^"SCALAR" ~ ^"STRING" )? )? ~
+    ( JSON_query_empty_behavior ~ ^"ON" ~ ^"EMPTY" )? ~
+    ( JSON_query_error_behavior ~ ^"ON" ~ ^"ERROR" )? ~ right_paren
+  }
+
+JSON_query_empty_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"EMPTY" ~ ^"ARRAY"
+  | ^"EMPTY" ~ ^"OBJECT"
+  }
+
+JSON_query_error_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"EMPTY" ~ ^"ARRAY"
+  | ^"EMPTY" ~ ^"OBJECT"
+  }
+
+JSON_query_quotes_behavior = {
+    ^"KEEP"
+  | ^"OMIT"
+  }
+
+JSON_query_wrapper_behavior = {
+    ^"WITHOUT" ~ ( ^"ARRAY" )?
+  | ^"WITH" ~ ( ^"CONDITIONAL" | ^"UNCONDITIONAL" )? ~ ( ^"ARRAY" )?
+  }
+
+JSON_representation = {
+    ^"JSON" ~ ( ^"ENCODING" ~ ( ^"UTF8" | ^"UTF16" | ^"UTF32" ) )?
+  }
+
+JSON_returning_clause = {
+    ^"RETURNING" ~ data_type
+  }
+
+JSON_table = {
+    ^"JSON_TABLE" ~ left_paren ~ JSON_API_common_syntax ~ JSON_table_columns_clause ~
+    ( JSON_table_plan_clause )? ~ ( JSON_table_error_behavior ~ ^"ON" ~ ^"ERROR" )? ~
+    right_paren
+  }
+
+JSON_table_column_definition = {
+    JSON_table_ordinality_column_definition
+  | JSON_table_regular_column_definition
+  | JSON_table_formatted_column_definition
+  | JSON_table_nested_columns
+  }
+
+JSON_table_column_empty_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"DEFAULT" ~ value_expression
+  }
+
+JSON_table_column_error_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"DEFAULT" ~ value_expression
+  }
+
+JSON_table_column_path_specification = {
+    JSON_path_specification
+  }
+
+JSON_table_columns_clause = {
+    ^"COLUMNS" ~ left_paren ~ JSON_table_column_definition ~
+    (comma ~ JSON_table_column_definition)* ~ right_paren
+  }
+
+JSON_table_default_plan = {
+    ^"PLAN" ~ ^"DEFAULT" ~ left_paren ~ JSON_table_default_plan_choices ~ right_paren
+  }
+
+JSON_table_default_plan_choices = {
+    JSON_table_default_plan_inner_outer ~ ( comma ~ JSON_table_default_plan_union_cross )?
+  | JSON_table_default_plan_union_cross ~ ( comma ~ JSON_table_default_plan_inner_outer )?
+  }
+
+JSON_table_default_plan_inner_outer = {
+    ^"INNER"
+  | ^"OUTER"
+  }
+
+JSON_table_default_plan_union_cross = {
+    ^"UNION"
+  | ^"CROSS"
+  }
+
+JSON_table_error_behavior = {
+    ^"ERROR"
+  | ^"EMPTY"
+  }
+
+JSON_table_formatted_column_definition = {
+    column_name ~ data_type ~ ^"FORMAT" ~ JSON_representation ~
+    ( ^"PATH" ~ JSON_table_column_path_specification )? ~
+    ( JSON_table_formatted_column_wrapper_behavior ~ ^"WRAPPER" )? ~
+    ( JSON_table_formatted_column_quotes_behavior ~ ^"QUOTES" ~ ( ^"ON" ~ ^"SCALAR" ~ ^"STRING" )? )? ~
+    ( JSON_table_formatted_column_empty_behavior ~ ^"ON" ~ ^"EMPTY" )? ~
+    ( JSON_table_formatted_column_error_behavior ~ ^"ON" ~ ^"ERROR" )?
+  }
+
+JSON_table_formatted_column_empty_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"EMPTY" ~ ^"ARRAY"
+  | ^"EMPTY" ~ ^"OBJECT"
+  }
+
+JSON_table_formatted_column_error_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"EMPTY" ~ ^"ARRAY"
+  | ^"EMPTY" ~ ^"OBJECT"
+  }
+
+JSON_table_formatted_column_quotes_behavior = {
+    ^"KEEP"
+  | ^"OMIT"
+  }
+
+JSON_table_formatted_column_wrapper_behavior = {
+    ^"WITHOUT" ~ ( ^"ARRAY" )?
+  | ^"WITH" ~ ( ^"CONDITIONAL" | ^"UNCONDITIONAL" )? ~ ( ^"ARRAY" )?
+  }
+
+JSON_table_nested_columns = {
+    ^"NESTED" ~ ( ^"PATH" )? ~ JSON_table_nested_path_specification ~
+    ( ^"AS" ~ JSON_table_nested_path_name )? ~ JSON_table_columns_clause
+  }
+
+JSON_table_nested_path_name = {
+    JSON_table_path_name
+  }
+
+JSON_table_nested_path_specification = {
+    JSON_path_specification
+  }
+
+JSON_table_ordinality_column_definition = {
+    column_name ~ ^"FOR" ~ ^"ORDINALITY"
+  }
+
+JSON_table_path_name = {
+    identifier
+  }
+
+JSON_table_plan = {
+    JSON_table_path_name
+  | JSON_table_plan_parent_child
+  | JSON_table_plan_sibling
+  }
+
+JSON_table_plan_clause = {
+    JSON_table_specific_plan
+  | JSON_table_default_plan
+  }
+
+JSON_table_plan_cross = {
+    JSON_table_plan_primary ~ ^"CROSS" ~ JSON_table_plan_primary ~
+    ( ^"CROSS" ~ JSON_table_plan_primary)*
+  }
+
+JSON_table_plan_inner = {
+    JSON_table_path_name ~ ^"INNER" ~ JSON_table_plan_primary
+  }
+
+JSON_table_plan_outer = {
+    JSON_table_path_name ~ ^"OUTER" ~ JSON_table_plan_primary
+  }
+
+JSON_table_plan_parent_child = {
+    JSON_table_plan_outer
+  | JSON_table_plan_inner
+  }
+
+JSON_table_plan_primary = {
+    JSON_table_path_name
+  | left_paren ~ JSON_table_plan ~ right_paren
+  }
+
+JSON_table_plan_sibling = {
+    JSON_table_plan_union
+  | JSON_table_plan_cross
+  }
+
+JSON_table_plan_union = {
+    JSON_table_plan_primary ~ ^"UNION" ~ JSON_table_plan_primary ~
+    ( ^"UNION" ~ JSON_table_plan_primary)*
+  }
+
+JSON_table_primitive = {
+    ^"JSON_TABLE_PRIMITIVE" ~ left_paren ~ JSON_API_common_syntax ~
+    JSON_table_primitive_columns_clause ~ JSON_table_error_behavior ~ ^"ON" ~ ^"ERROR" ~
+    right_paren
+  }
+
+JSON_table_primitive_chaining_column = {
+    column_name ~ ^"FOR" ~ ^"CHAINING"
+  }
+
+JSON_table_primitive_column_definition = {
+    JSON_table_ordinality_column_definition
+  | JSON_table_regular_column_definition
+  | JSON_table_formatted_column_definition
+  | JSON_table_primitive_chaining_column
+  }
+
+JSON_table_primitive_columns_clause = {
+    ^"COLUMNS" ~ left_paren ~ JSON_table_primitive_column_definition ~
+    (comma ~ JSON_table_primitive_column_definition)* ~ right_paren
+  }
+
+JSON_table_regular_column_definition = {
+    column_name ~ data_type ~ ( ^"PATH" ~ JSON_table_column_path_specification )? ~
+    ( JSON_table_column_empty_behavior ~ ^"ON" ~ ^"EMPTY" )? ~
+    ( JSON_table_column_error_behavior ~ ^"ON" ~ ^"ERROR" )?
+  }
+
+JSON_table_specific_plan = {
+    ^"PLAN" ~ left_paren ~ JSON_table_plan ~ right_paren
+  }
+
+JSON_value_constructor = {
+    JSON_object_constructor
+  | JSON_array_constructor
+  }
+
+JSON_value_empty_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"DEFAULT" ~ value_expression
+  }
+
+JSON_value_error_behavior = {
+    ^"ERROR"
+  | ^"NULL"
+  | ^"DEFAULT" ~ value_expression
+  }
+
+JSON_value_expression = {
+    value_expression ~ ( JSON_input_clause )?
+  }
+
+JSON_value_function = {
+     ^"JSON_VALUE" ~ left_paren ~ JSON_API_common_syntax ~ ( JSON_returning_clause )? ~
+    ( JSON_value_empty_behavior ~ ^"ON" ~ ^"EMPTY" )? ~
+    ( JSON_value_error_behavior ~ ^"ON" ~ ^"ERROR" )? ~ right_paren
+  }
+
+PTF_cursor_name = {
+    ^"PTF" ~ simple_value_specification
+  }
+
+PTF_derived_table = {
+    ^"TABLE" ~ left_paren ~ routine_invocation ~ right_paren
+  }
+
+PTF_describe_component_procedure = {
+    specific_routine_designator
+  }
+
+PTF_descriptor_name = {
+    ^"PTF" ~ simple_value_specification
+  }
+
+PTF_finish_component_procedure = {
+    specific_routine_designator
+  }
+
+PTF_fulfill_component_procedure = {
+    specific_routine_designator
+  }
+
+PTF_private_parameters = {
+    ^"PRIVATE" ~ ( ^"DATA" )? ~ private_parameter_declaration_list
+  }
+
+PTF_start_component_procedure = {
+    specific_routine_designator
+  }
+
+SQL_argument = {
+    value_expression
+  | generalized_expression
+  | target_specification
+  | contextually_typed_value_specification
+  | named_argument_specification
+  | table_argument
+  | descriptor_argument
+  }
+
+SQL_argument_list = {
+    left_paren ~
+    ( SQL_argument ~ (comma ~ SQL_argument)* ~ ( copartition_clause )? )? ~
+    right_paren
+  }
+
+SQL_condition = {
+    major_category
+  | ^"SQLSTATE" ~ ( SQLSTATE_class_code ~ ( comma ~ SQLSTATE_subclass_code )? )
+  | ^"CONSTRAINT" ~ constraint_name
+  }
+
+SQL_connection_statement = {
+    connect_statement
+  | set_connection_statement
+  | disconnect_statement
+  }
+
+SQL_control_statement = {
+    call_statement
+  | return_statement
+  }
+
+SQL_data_change_statement = {
+    delete_statement_positioned
+  | delete_statement_searched
+  | insert_statement
+  | update_statement_positioned
+  | update_statement_searched
+  | truncate_table_statement
+  | merge_statement
+  }
+
+SQL_data_statement = {
+    open_statement
+  | fetch_statement
+  | close_statement
+  | select_statement_single_row
+  | free_locator_statement
+  | hold_locator_statement
+  | SQL_data_change_statement
+  }
+
+SQL_descriptor_statement = {
+    allocate_descriptor_statement
+  | deallocate_descriptor_statement
+  | set_descriptor_statement
+  | get_descriptor_statement
+  }
+
+SQL_diagnostics_information = {
+    statement_information
+  | condition_information
+  | all_information
+  }
+
+SQL_diagnostics_statement = {
+    get_diagnostics_statement
+  }
+
+SQL_dynamic_data_statement = {
+    allocate_extended_dynamic_cursor_statement
+  | allocate_received_cursor_statement
+  | dynamic_open_statement
+  | dynamic_fetch_statement
+  | dynamic_close_statement
+  | dynamic_delete_statement_positioned
+  | dynamic_update_statement_positioned
+  }
+
+SQL_dynamic_statement = {
+    SQL_descriptor_statement
+  | prepare_statement
+  | deallocate_prepared_statement
+  | describe_statement
+  | execute_statement
+  | execute_immediate_statement
+  | SQL_dynamic_data_statement
+  | copy_descriptor_statement
+  | pipe_row_statement
+  }
+
+SQL_executable_statement = {
+    SQL_schema_statement
+  | SQL_data_statement
+  | SQL_control_statement
+  | SQL_transaction_statement
+  | SQL_connection_statement
+  | SQL_session_statement
+  | SQL_diagnostics_statement
+  | SQL_dynamic_statement
+  }
+
+SQL_language_character = {
+    simple_Latin_letter
+  | digit
+  | SQL_special_character
+  }
+
+SQL_language_identifier = {
+    SQL_language_identifier_start ~ ( SQL_language_identifier_part )*
+  }
+
+SQL_language_identifier_part = {
+    simple_Latin_letter
+  | digit
+  | underscore
+  }
+
+SQL_language_identifier_start = {
+    simple_Latin_letter
+  }
+
+SQL_parameter_declaration = {
+    ( parameter_mode )? ~ ( SQL_parameter_name )? ~ parameter_type ~ ( ^"RESULT" )? ~
+    ( ^"DEFAULT" ~ parameter_default )?
+  }
+
+SQL_parameter_declaration_list = {
+    left_paren ~
+    ( SQL_parameter_declaration ~ (comma ~ SQL_parameter_declaration)* )? ~
+    right_paren
+  }
+
+SQL_parameter_name = {
+    identifier
+  }
+
+SQL_parameter_reference = {
+    basic_identifier_chain
+  }
+
+SQL_prefix = {
+    ^"EXEC" ~ ^"SQL"
+  | ampersand ~ ^"SQL" ~ left_paren
+  }
+
+SQL_procedure_statement = {
+    SQL_executable_statement
+  }
+
+SQL_routine_body = {
+    SQL_procedure_statement
+  }
+
+SQL_routine_spec = {
+    ( rights_clause )? ~ SQL_routine_body
+  }
+
+SQL_schema_definition_statement = {
+    schema_definition
+  | table_definition
+  | view_definition
+  | SQL_invoked_routine
+  | grant_statement
+  | role_definition
+  | domain_definition
+  | character_set_definition
+  | collation_definition
+  | transliteration_definition
+  | assertion_definition
+  | trigger_definition
+  | user_defined_type_definition
+  | user_defined_cast_definition
+  | user_defined_ordering_definition
+  | transform_definition
+  | sequence_generator_definition
+  }
+
+SQL_schema_manipulation_statement = {
+    drop_schema_statement
+  | alter_table_statement
+  | drop_table_statement
+  | drop_view_statement
+  | alter_routine_statement
+  | drop_routine_statement
+  | drop_user_defined_cast_statement
+  | revoke_statement
+  | drop_role_statement
+  | alter_domain_statement
+  | drop_domain_statement
+  | drop_character_set_statement
+  | drop_collation_statement
+  | drop_transliteration_statement
+  | drop_assertion_statement
+  | drop_trigger_statement
+  | alter_type_statement
+  | drop_data_type_statement
+  | drop_user_defined_ordering_statement
+  | alter_transform_statement
+  | drop_transform_statement
+  | alter_sequence_generator_statement
+  | drop_sequence_generator_statement
+  }
+
+SQL_schema_statement = {
+    SQL_schema_definition_statement
+  | SQL_schema_manipulation_statement
+  }
+
+SQL_session_statement = {
+    set_session_user_identifier_statement
+  | set_role_statement
+  | set_local_time_zone_statement
+  | set_session_characteristics_statement
+  | set_catalog_statement
+  | set_schema_statement
+  | set_names_statement
+  | set_path_statement
+  | set_transform_group_statement
+  | set_session_collation_statement
+  }
+
+SQL_special_character = {
+    space
+  | double_quote
+  | percent
+  | ampersand
+  | quote
+  | left_paren
+  | right_paren
+  | asterisk
+  | plus_sign
+  | comma
+  | minus_sign
+  | period
+  | solidus
+  | colon
+  | semicolon
+  | less_than_operator
+  | equals_operator
+  | greater_than_operator
+  | question_mark
+  | left_bracket
+  | right_bracket
+  | circumflex
+  | underscore
+  | vertical_bar
+  | left_brace
+  | right_brace
+  | dollar_sign
+  | apostrophe
+  }
+
+SQL_statement_name = {
+    statement_name
+  | extended_statement_name
+  }
+
+SQL_statement_variable = {
+    simple_value_specification
+  }
+
+SQL_terminal_character = {
+    SQL_language_character
+  }
+
+SQL_terminator = {
+    ^"END_EXEC"
+  | semicolon
+  | right_paren
+  }
+
+SQL_transaction_statement = {
+    start_transaction_statement
+  | set_transaction_statement
+  | set_constraints_mode_statement
+  | savepoint_statement
+  | release_savepoint_statement
+  | commit_statement
+  | rollback_statement
+  }
+
+SQL_client_module_definition = {
+    module_name_clause ~ language_clause ~ module_authorization_clause ~
+    ( module_path_specification )? ~ ( module_transform_group_specification )? ~
+    ( module_collations )? ~ ( temporary_table_declaration )* ~
+    module_contents+
+  }
+
+SQL_client_module_name = {
+    identifier
+  }
+
+SQL_data_access_indication = {
+    ^"NO" ~ ^"SQL"
+  | ^"CONTAINS" ~ ^"SQL"
+  | ^"READS" ~ ^"SQL" ~ ^"DATA"
+  | ^"MODIFIES" ~ ^"SQL" ~ ^"DATA"
+  }
+
+SQL_invoked_function = {
+    ( function_specification | method_specification_designator ) ~ routine_body
+  }
+
+SQL_invoked_procedure = {
+    ^"PROCEDURE" ~ schema_qualified_routine_name ~ SQL_parameter_declaration_list ~
+    routine_characteristics ~ routine_body
+  }
+
+SQL_invoked_routine = {
+    schema_routine
+  }
+
+SQL_path_characteristic = {
+    ^"PATH" ~ value_specification
+  }
+
+SQL_server_name = {
+    simple_value_specification
+  }
+
+SQLSTATE_char = {
+    simple_Latin_upper_case_letter
+  | digit
+  }
+
+SQLSTATE_class_code = {
+    SQLSTATE_char ~ SQLSTATE_char
+  }
+
+SQLSTATE_subclass_code = {
+    SQLSTATE_char ~ SQLSTATE_char ~ SQLSTATE_char
+  }
+
+Unicode_4_digit_escape_value = {
+    Unicode_escape_character ~ hexit ~ hexit ~ hexit ~ hexit
+  }
+
+Unicode_6_digit_escape_value = {
+    Unicode_escape_character ~ plus_sign ~ hexit ~ hexit ~ hexit ~ hexit ~ hexit ~ hexit
+  }
+
+Unicode_character_escape_value = {
+    Unicode_escape_character ~ Unicode_escape_character
+  }
+
+Unicode_character_string_literal = @{
+    ( introducer ~ character_set_specification )? ~ ^"U" ~ ampersand ~ quote ~
+    ( Unicode_representation )* ~ quote ~
+    (separator ~ quote ~ ( Unicode_representation )* ~ quote)* ~ Unicode_escape_specifier?
+  }
+
+Unicode_delimited_identifier = {
+    ^"U" ~ ampersand ~ double_quote ~ Unicode_delimiter_body ~ double_quote ~ Unicode_escape_specifier?
+  }
+
+Unicode_delimiter_body = {
+    Unicode_identifier_part+
+  }
+
+Unicode_escape_character = {
+    !( hexit | plus_sign | quote | double_quote | WHITESPACE) ~ ANY
+  }
+
+Unicode_escape_specifier = {
+    ^"UESCAPE" ~ quote ~ Unicode_escape_character ~ quote
+  }
+
+Unicode_escape_value = {
+    Unicode_4_digit_escape_value
+  | Unicode_6_digit_escape_value
+  | Unicode_character_escape_value
+  }
+
+Unicode_identifier_part = {
+    delimited_identifier_part
+  | Unicode_escape_value
+  }
+
+Unicode_representation = {
+    character_representation
+  | Unicode_escape_value
+  }
+
+XQuery_option_flag = {
+    character_value_expression
+  }
+
+XQuery_pattern = {
+    character_value_expression
+  }
+
+XQuery_replacement_string = {
+    character_value_expression
+  }
+
+absolute_value_expression = {
+    ^"ABS" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+action = {
+    ^"SELECT"
+  | ^"SELECT" ~ left_paren ~ privilege_column_list ~ right_paren
+  | ^"SELECT" ~ left_paren ~ privilege_method_list ~ right_paren
+  | ^"DELETE"
+  | ^"INSERT" ~ ( left_paren ~ privilege_column_list ~ right_paren )?
+  | ^"UPDATE" ~ ( left_paren ~ privilege_column_list ~ right_paren )?
+  | ^"REFERENCES" ~ ( left_paren ~ privilege_column_list ~ right_paren )?
+  | ^"USAGE"
+  | ^"TRIGGER"
+  | ^"UNDER"
+  | ^"EXECUTE"
+  }
+
+actual_identifier = {
+    regular_identifier
+  | delimited_identifier
+  | Unicode_delimited_identifier
+  }
+
+add_attribute_definition = {
+    ^"ADD" ~ ^"ATTRIBUTE" ~ attribute_definition
+  }
+
+add_column_definition = {
+    ^"ADD" ~ ( ^"COLUMN" )? ~ column_definition
+  }
+
+add_column_scope_clause = {
+    ^"ADD" ~ scope_clause
+  }
+
+add_domain_constraint_definition = {
+    ^"ADD" ~ domain_constraint
+  }
+
+add_original_method_specification = {
+    ^"ADD" ~ original_method_specification
+  }
+
+add_overriding_method_specification = {
+    ^"ADD" ~ overriding_method_specification
+  }
+
+add_system_time_period_column_list = {
+    ^"ADD" ~ ( ^"COLUMN" )? ~ column_definition_1 ~ ^"ADD" ~ ( ^"COLUMN" )? ~ column_definition_2
+  }
+
+add_system_versioning_clause = {
+    ^"ADD" ~ system_versioning_clause
+  }
+
+add_table_constraint_definition = {
+    ^"ADD" ~ table_constraint_definition
+  }
+
+add_table_period_definition = {
+    ^"ADD" ~ table_period_definition ~ ( add_system_time_period_column_list )?
+  }
+
+add_transform_element_list = {
+    ^"ADD" ~ left_paren ~ transform_element_list ~ right_paren
+  }
+
+aggregate_function = {
+    ^"COUNT" ~ left_paren ~ asterisk ~ right_paren ~ ( filter_clause )?
+  | general_set_function ~ ( filter_clause )?
+  | binary_set_function ~ ( filter_clause )?
+  | ordered_set_function ~ ( filter_clause )?
+  | array_aggregate_function ~ ( filter_clause )?
+  | row_pattern_count_function ~ ( filter_clause )?
+  | JSON_aggregate_function ~ ( filter_clause )?
+  }
+
+all  = {
+    ^"ALL"
+  }
+all_fields_column_name_list = {
+    column_name_list
+  }
+
+all_fields_reference = {
+    value_expression_primary ~ period ~ asterisk ~
+    ( ^"AS" ~ left_paren ~ all_fields_column_name_list ~ right_paren )?
+  }
+
+all_info_target = {
+    simple_target_specification
+  }
+
+all_information = {
+    all_info_target ~ equals_operator ~ ^"ALL" ~ ( all_qualifier )?
+  }
+
+all_qualifier = {
+    ^"STATEMENT"
+  | ^"CONDITION" ~ ( condition_number )?
+  }
+
+allocate_descriptor_statement = {
+    ^"ALLOCATE" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ conventional_descriptor_name ~
+    ( ^"WITH" ~ ^"MAX" ~ occurrences )?
+  }
+
+allocate_extended_dynamic_cursor_statement = {
+    ^"ALLOCATE" ~ extended_cursor_name ~ cursor_properties ~ ^"FOR" ~
+    extended_statement_name
+  }
+
+allocate_received_cursor_statement = {
+    ^"ALLOCATE" ~ cursor_name ~ ( ^"CURSOR" )? ~ ^"FOR" ~ ^"PROCEDURE" ~ specific_routine_designator
+  }
+
+alter_column_action = {
+    set_column_default_clause
+  | drop_column_default_clause
+  | set_column_not_null_clause
+  | drop_column_not_null_clause
+  | add_column_scope_clause
+  | drop_column_scope_clause
+  | alter_column_data_type_clause
+  | alter_identity_column_specification
+  | drop_identity_property_clause
+  | drop_column_generation_expression_clause
+  }
+
+alter_column_data_type_clause = {
+    ^"SET" ~ ^"DATA" ~ ^"TYPE" ~ data_type
+  }
+
+alter_column_definition = {
+    ^"ALTER" ~ ( ^"COLUMN" )? ~ column_name ~ alter_column_action
+  }
+
+alter_domain_action = {
+    set_domain_default_clause
+  | drop_domain_default_clause
+  | add_domain_constraint_definition
+  | drop_domain_constraint_definition
+  }
+
+alter_domain_statement = {
+    ^"ALTER" ~ ^"DOMAIN" ~ domain_name ~ alter_domain_action
+  }
+
+alter_group = {
+    group_name ~ left_paren ~ alter_transform_action_list ~ right_paren
+  }
+
+alter_identity_column_option = {
+    alter_sequence_generator_restart_option
+  | ^"SET" ~ basic_sequence_generator_option
+  }
+
+alter_identity_column_specification = {
+    set_identity_column_generation_clause ~ ( alter_identity_column_option )*
+  | alter_identity_column_option+
+  }
+
+alter_routine_behavior = {
+    ^"RESTRICT"
+  }
+
+alter_routine_characteristic = {
+    language_clause
+  | parameter_style_clause
+  | SQL_data_access_indication
+  | null_call_clause
+  | returned_result_sets_characteristic
+  | ^"NAME" ~ external_routine_name
+  }
+
+alter_routine_characteristics = {
+    alter_routine_characteristic+
+  }
+
+alter_routine_statement = {
+    ^"ALTER" ~ specific_routine_designator ~ alter_routine_characteristics ~
+    alter_routine_behavior
+  }
+
+alter_sequence_generator_option = {
+    alter_sequence_generator_restart_option
+  | basic_sequence_generator_option
+  }
+
+alter_sequence_generator_options = {
+    alter_sequence_generator_option+
+  }
+
+alter_sequence_generator_restart_option = {
+    ^"RESTART" ~ ( ^"WITH" ~ sequence_generator_restart_value )?
+  }
+
+alter_sequence_generator_statement = {
+    ^"ALTER" ~ ^"SEQUENCE" ~ sequence_generator_name ~ alter_sequence_generator_options
+  }
+
+alter_table_action = {
+    add_column_definition
+  | alter_column_definition
+  | drop_column_definition
+  | add_table_constraint_definition
+  | alter_table_constraint_definition
+  | drop_table_constraint_definition
+  | add_table_period_definition
+  | drop_table_period_definition
+  | add_system_versioning_clause
+  | drop_system_versioning_clause
+  }
+
+alter_table_constraint_definition = {
+    ^"ALTER" ~ ^"CONSTRAINT" ~ constraint_name ~ constraint_enforcement
+  }
+
+alter_table_statement = {
+    ^"ALTER" ~ ^"TABLE" ~ table_name ~ alter_table_action
+  }
+
+alter_transform_action = {
+    add_transform_element_list
+  | drop_transform_element_list
+  }
+
+alter_transform_action_list = {
+    alter_transform_action ~ (comma ~ alter_transform_action)*
+  }
+
+alter_transform_statement = {
+    ^"ALTER" ~ ( ^"TRANSFORM" | ^"TRANSFORMS" ) ~ ^"FOR" ~ schema_resolved_user_defined_type_name ~
+    alter_group+
+  }
+
+alter_type_action = {
+    add_attribute_definition
+  | drop_attribute_definition
+  | add_original_method_specification
+  | add_overriding_method_specification
+  | drop_method_specification
+  }
+
+alter_type_statement = {
+    ^"ALTER" ~ ^"TYPE" ~ schema_resolved_user_defined_type_name ~ alter_type_action
+  }
+
+ampersand = {
+    "&"
+  }
+
+apostrophe = {
+    "'"
+  }
+
+application_time_period_name = {
+    identifier
+  }
+
+application_time_period_specification = {
+    ^"PERIOD" ~ ^"FOR" ~ application_time_period_name
+  }
+
+approximate_numeric_literal = @{
+    mantissa ~ ^"E" ~ exponent
+  }
+
+approximate_numeric_type = {
+    ^"FLOAT" ~ ( left_paren ~ precision ~ right_paren )?
+  | ^"REAL"
+  | ^"DOUBLE" ~ ^"PRECISION"
+  }
+
+array_aggregate_function = {
+    ^"ARRAY_AGG" ~ left_paren ~ value_expression ~
+    ( ^"ORDER" ~ ^"BY" ~ sort_specification_list )? ~ right_paren
+  }
+
+array_concatenation = {
+     array_primary ~ (concatenation_operator ~ array_primary)*
+  }
+
+array_element = {
+    value_expression
+  }
+
+array_element_list = {
+    array_element ~ (comma ~ array_element)*
+  }
+
+array_element_reference = {
+    ^"ELEMENT" ~ left_paren ~ array_value_expression ~ right_paren ~
+    left_bracket_or_trigraph ~ numeric_value_expression ~ right_bracket_or_trigraph
+  }
+
+array_primary = {
+    array_value_function
+  | value_expression_primary
+  }
+
+array_type = {
+    scalar_data_type ~ ^"ARRAY" ~
+    ( left_bracket_or_trigraph ~ maximum_cardinality ~ right_bracket_or_trigraph )?
+  }
+
+array_value_constructor = {
+    array_value_constructor_by_enumeration
+  | array_value_constructor_by_query
+  }
+
+array_value_constructor_by_enumeration = {
+    ^"ARRAY" ~ left_bracket_or_trigraph ~ array_element_list ~
+    right_bracket_or_trigraph
+  }
+
+array_value_constructor_by_query = {
+    ^"ARRAY" ~ table_subquery
+  }
+
+array_value_expression = {
+    array_concatenation
+  | array_primary
+  }
+
+array_value_function = {
+    trim_array_function
+  }
+
+as_clause = {
+    ( ^"AS" )? ~ column_name
+  }
+
+as_subquery_clause = {
+    ( left_paren ~ column_name_list ~ right_paren )? ~ ^"AS" ~ table_subquery ~
+    with_or_without_data
+  }
+
+assertion_definition = {
+    ^"CREATE" ~ ^"ASSERTION" ~ constraint_name ~ ^"CHECK" ~ left_paren ~ search_condition ~
+    right_paren ~ ( constraint_characteristics )?
+  }
+
+assigned_row = {
+    contextually_typed_row_value_expression
+  }
+
+asterisk = {
+    "*"
+  }
+
+asterisked_identifier = {
+    identifier
+  }
+
+asterisked_identifier_chain = {
+    asterisked_identifier ~ (period ~ asterisked_identifier)*
+  }
+
+attribute_default = {
+    default_clause
+  }
+
+attribute_definition = {
+    attribute_name ~ data_type ~ ( attribute_default )? ~ ( collate_clause )?
+  }
+
+attribute_name = {
+    identifier
+  }
+
+attributes_specification = {
+    ^"ATTRIBUTES" ~ attributes_variable
+  }
+
+attributes_variable = {
+    simple_value_specification
+  }
+
+authorization_identifier = {
+    role_name
+  | user_identifier
+  }
+
+basic_identifier_chain = {
+    identifier_chain
+  }
+
+basic_sequence_generator_option = {
+    sequence_generator_increment_by_option
+  | sequence_generator_maxvalue_option
+  | sequence_generator_minvalue_option
+  | sequence_generator_cycle_option
+  }
+
+between_predicate = {
+    row_value_predicand ~ between_predicate_part_2
+  }
+
+between_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"BETWEEN" ~ ( ^"ASYMMETRIC" | ^"SYMMETRIC" )? ~ row_value_predicand ~ ^"AND" ~
+    row_value_predicand
+  }
+
+binary_concatenation = {
+    binary_factor ~ concatenation_operator ~ binary_value_expression
+  }
+
+binary_factor = {
+    binary_primary
+  }
+
+binary_large_object_string_type = {
+    ^"BINARY" ~ ^"LARGE" ~ ^"OBJECT" ~ ( left_paren ~ large_object_length ~ right_paren )?
+  | ^"BLOB" ~ ( left_paren ~ large_object_length ~ right_paren )?
+  }
+
+binary_overlay_function = {
+    ^"OVERLAY" ~ left_paren ~ binary_value_expression ~ ^"PLACING" ~
+    binary_value_expression ~ ^"FROM" ~ start_position ~ ( ^"FOR" ~ string_length )? ~
+    right_paren
+  }
+
+binary_position_expression = {
+    ^"POSITION" ~ left_paren ~ binary_value_expression ~ ^"IN" ~ binary_value_expression ~
+    right_paren
+  }
+
+binary_primary = {
+    value_expression_primary
+  | string_value_function
+  }
+
+binary_set_function = {
+    binary_set_function_type ~ left_paren ~ dependent_variable_expression ~
+    comma ~ independent_variable_expression ~ right_paren
+  }
+
+binary_set_function_type = {
+    ^"COVAR_POP"
+  | ^"COVAR_SAMP"
+  | ^"CORR"
+  | ^"REGR_SLOPE"
+  | ^"REGR_INTERCEPT"
+  | ^"REGR_COUNT"
+  | ^"REGR_R2"
+  | ^"REGR_AVGX"
+  | ^"REGR_AVGY"
+  | ^"REGR_SXX"
+  | ^"REGR_SYY"
+  | ^"REGR_SXY"
+  }
+
+binary_string_literal = @{
+    ^"X" ~ quote ~ ( space )* ~
+    (hexit ~ ( space )* ~ hexit ~ ( space )*)* ~ quote ~
+    (separator ~ quote ~ ( space )* ~ (hexit ~ ( space )* ~ hexit ~ ( space )*)* ~ quote)*
+  }
+
+binary_string_type = {
+    ^"BINARY" ~ ( left_paren ~ length ~ right_paren )?
+  | ^"BINARY" ~ ^"VARYING" ~ left_paren ~ length ~ right_paren
+  | ^"VARBINARY" ~ left_paren ~ length ~ right_paren
+  | binary_large_object_string_type
+  }
+
+binary_substring_function = {
+    ^"SUBSTRING" ~ left_paren ~ binary_value_expression ~ ^"FROM" ~ start_position ~
+    ( ^"FOR" ~ string_length )? ~ right_paren
+  }
+
+binary_trim_function = {
+    ^"TRIM" ~ left_paren ~ binary_trim_operands ~ right_paren
+  }
+
+binary_trim_operands = {
+    ( ( trim_specification )? ~ ( trim_octet )? ~ ^"FROM" )? ~ binary_trim_source
+  }
+
+binary_trim_source = {
+    binary_value_expression
+  }
+
+binary_value_expression = {
+    binary_concatenation
+  | binary_factor
+  }
+
+binary_value_function = {
+    binary_substring_function
+  | binary_trim_function
+  | binary_overlay_function
+  }
+
+boolean_factor = {
+    ( ^"NOT" )? ~ boolean_test
+  }
+
+boolean_literal = {
+    ^"TRUE"
+  | ^"FALSE"
+  | ^"UNKNOWN"
+  }
+
+boolean_predicand = {
+    parenthesized_boolean_value_expression
+  | nonparenthesized_value_expression_primary
+  }
+
+boolean_primary = {
+    predicate
+  | boolean_predicand
+  }
+
+boolean_term = {
+    boolean_factor ~ (^"AND" ~ boolean_term)?
+  }
+
+boolean_test = {
+    boolean_primary ~ ( ^"IS" ~ ( ^"NOT" )? ~ truth_value )?
+  }
+
+boolean_type = {
+    ^"BOOLEAN"
+  }
+
+boolean_value_expression = {
+    boolean_term
+  | boolean_term ~ ^"OR" ~ boolean_value_expression
+  }
+
+bracketed_comment = {
+    bracketed_comment_introducer ~ bracketed_comment_contents ~
+    bracketed_comment_terminator
+  }
+
+bracketed_comment_contents = {
+    ( comment_character | separator )*
+  }
+
+bracketed_comment_introducer = {
+    "/*"
+  }
+
+bracketed_comment_terminator = {
+    "*/"
+  }
+
+call_statement = {
+    ^"CALL" ~ routine_invocation
+  }
+
+cardinality_expression = {
+    ^"CARDINALITY" ~ left_paren ~ collection_value_expression ~ right_paren
+  }
+
+case_abbreviation = {
+    ^"NULLIF" ~ left_paren ~ value_expression ~ comma ~ value_expression ~ right_paren
+  | ^"COALESCE" ~ left_paren ~ value_expression ~ ( comma ~ value_expression )+ ~ right_paren
+  }
+
+case_expression = {
+    case_abbreviation
+  | case_specification
+  }
+
+case_operand = {
+    row_value_predicand
+  | overlaps_predicate_part_1
+  }
+
+case_specification = {
+    simple_case
+  | searched_case
+  }
+
+cast_function = {
+    specific_routine_designator
+  }
+
+cast_operand = {
+    value_expression
+  | implicitly_typed_value_specification
+  }
+
+cast_specification = {
+    ^"CAST" ~ left_paren ~ cast_operand ~ ^"AS" ~ cast_target ~ ( ^"FORMAT" ~ cast_template )? ~
+    right_paren
+  }
+
+cast_target = {
+    domain_name
+  | data_type
+  }
+
+cast_template = {
+    character_string_literal
+  }
+
+cast_to_distinct = {
+    ^"CAST" ~ left_paren ~ ^"SOURCE" ~ ^"AS" ~ ^"DISTINCT" ~ right_paren ~ ^"WITH" ~
+    cast_to_distinct_identifier
+  }
+
+cast_to_distinct_identifier = {
+    identifier
+  }
+
+cast_to_ref = {
+    ^"CAST" ~ left_paren ~ ^"SOURCE" ~ ^"AS" ~ ^"REF" ~ right_paren ~ ^"WITH" ~ cast_to_ref_identifier
+  }
+
+cast_to_ref_identifier = {
+    identifier
+  }
+
+cast_to_source = {
+    ^"CAST" ~ left_paren ~ ^"DISTINCT" ~ ^"AS" ~ ^"SOURCE" ~ right_paren ~ ^"WITH" ~
+    cast_to_source_identifier
+  }
+
+cast_to_source_identifier = {
+    identifier
+  }
+
+cast_to_type = {
+    ^"CAST" ~ left_paren ~ ^"REF" ~ ^"AS" ~ ^"SOURCE" ~ right_paren ~ ^"WITH" ~ cast_to_type_identifier
+  }
+
+cast_to_type_identifier = {
+    identifier
+  }
+
+catalog_name = {
+    identifier
+  }
+
+catalog_name_characteristic = {
+    ^"CATALOG" ~ value_specification
+  }
+
+ceiling_function = {
+    ( ^"CEIL" | ^"CEILING" ) ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+char_length_expression = {
+    ( ^"CHAR_LENGTH" | ^"CHARACTER_LENGTH" ) ~ left_paren ~ character_value_expression ~
+    ( ^"USING" ~ char_length_units )? ~ right_paren
+  }
+
+char_length_units = {
+    ^"CHARACTERS"
+  | ^"OCTETS"
+  }
+
+character_enumeration = {
+    character_specifier
+  | character_specifier ~ minus_sign ~ character_specifier
+  | left_bracket ~ colon ~ regular_character_set_identifier ~ colon ~ right_bracket
+  }
+
+character_enumeration_exclude = {
+    character_enumeration
+  }
+
+character_enumeration_include = {
+    character_enumeration
+  }
+
+character_factor = {
+    character_primary ~ ( collate_clause )?
+  }
+
+character_large_object_length = {
+    large_object_length ~ ( char_length_units )?
+  }
+
+character_large_object_type = {
+    ^"CHARACTER" ~ ^"LARGE" ~ ^"OBJECT" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  | ^"CHAR" ~ ^"LARGE" ~ ^"OBJECT" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  | ^"CLOB" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  }
+
+character_length = {
+    length ~ ( char_length_units )?
+  }
+
+character_like_predicate = {
+    row_value_predicand ~ character_like_predicate_part_2
+  }
+
+character_like_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"LIKE" ~ character_pattern ~ ( ^"ESCAPE" ~ escape_character )?
+  }
+
+character_overlay_function = {
+    ^"OVERLAY" ~ left_paren ~ character_value_expression ~ ^"PLACING" ~
+    character_value_expression ~ ^"FROM" ~ start_position ~ ( ^"FOR" ~ string_length )? ~
+    ( ^"USING" ~ char_length_units )? ~ right_paren
+  }
+
+character_pattern = {
+    character_value_expression
+  }
+
+character_position_expression = {
+    ^"POSITION" ~ left_paren ~ character_value_expression_1 ~ ^"IN" ~
+    character_value_expression_2 ~ ( ^"USING" ~ char_length_units )? ~ right_paren
+  }
+
+character_primary = {
+    value_expression_primary
+  | string_value_function
+  }
+
+character_representation = {
+    nonquote_character
+  | quote_symbol
+  }
+
+character_set_definition = {
+    ^"CREATE" ~ ^"CHARACTER" ~ ^"SET" ~ character_set_name ~ ( ^"AS" )? ~ character_set_source ~
+    ( collate_clause )?
+  }
+
+character_set_name = {
+    ( schema_name ~ period )? ~ SQL_language_identifier
+  }
+
+character_set_name_characteristic = {
+    ^"NAMES" ~ value_specification
+  }
+
+character_set_source = {
+    ^"GET" ~ character_set_specification
+  }
+
+character_set_specification = {
+    standard_character_set_name
+  | implementation_defined_character_set_name
+  | user_defined_character_set_name
+  }
+
+character_set_specification_list = {
+    character_set_specification ~ (comma ~ character_set_specification)*
+  }
+
+character_specifier = {
+    non_escaped_character
+  | escaped_character
+  }
+
+character_string_literal = @{
+    ( introducer ~ character_set_specification )? ~ quote ~
+    ( character_representation )* ~ quote ~
+    (separator ~ quote ~ ( character_representation )* ~ quote)*
+  }
+
+character_string_type = {
+    ^"CHARACTER" ~ ( left_paren ~ character_length ~ right_paren )?
+  | ^"CHAR" ~ ( left_paren ~ character_length ~ right_paren )?
+  | ^"CHARACTER" ~ ^"VARYING" ~ left_paren ~ character_length ~ right_paren
+  | ^"CHAR" ~ ^"VARYING" ~ left_paren ~ character_length ~ right_paren
+  | ^"VARCHAR" ~ left_paren ~ character_length ~ right_paren
+  | character_large_object_type
+  }
+
+character_substring_function = {
+    ^"SUBSTRING" ~ left_paren ~ character_value_expression ~ ^"FROM" ~ start_position ~
+    ( ^"FOR" ~ string_length )? ~ ( ^"USING" ~ char_length_units )? ~ right_paren
+  }
+
+character_transliteration = {
+    ^"TRANSLATE" ~ left_paren ~ character_value_expression ~ ^"USING" ~
+    transliteration_name ~ right_paren
+  }
+
+character_value_expression = {
+    concatenation
+  | character_factor
+  }
+
+character_value_expression_1 = {
+    character_value_expression
+  }
+
+character_value_expression_2 = {
+    character_value_expression
+  }
+
+character_value_function = {
+    character_substring_function
+  | regular_expression_substring_function
+  | regex_substring_function
+  | fold
+  | transcoding
+  | character_transliteration
+  | regex_transliteration
+  | trim_function
+  | character_overlay_function
+  | normalize_function
+  | specific_type_method
+  | classifier_function
+  }
+
+check_constraint_definition = {
+    ^"CHECK" ~ left_paren ~ search_condition ~ right_paren
+  }
+
+circumflex = {
+    "^"
+  }
+
+classifier_function = {
+    ^"CLASSIFIER" ~ left_paren ~ ( row_pattern_variable_name )? ~ right_paren
+  }
+
+close_statement = {
+    ^"CLOSE" ~ cursor_name
+  }
+
+collate_clause = {
+    ^"COLLATE" ~ collation_name
+  }
+
+collation_definition = {
+    ^"CREATE" ~ ^"COLLATION" ~ collation_name ~ ^"FOR" ~ character_set_specification ~ ^"FROM" ~
+    existing_collation_name ~ ( pad_characteristic )?
+  }
+
+collation_name = {
+    schema_qualified_name
+  }
+
+collation_specification = {
+    value_specification
+  }
+
+collection_derived_table = {
+    ^"UNNEST" ~ left_paren ~ collection_value_expression ~
+    (comma ~ collection_value_expression)* ~ right_paren ~
+    ( ^"WITH" ~ ^"ORDINALITY" )?
+  }
+
+collection_type = {
+    array_type
+  | multiset_type
+  }
+
+collection_value_constructor = {
+    array_value_constructor
+  | multiset_value_constructor
+  }
+
+collection_value_expression = {
+    array_value_expression
+  | multiset_value_expression
+  }
+
+colon = {
+    ":"
+  }
+
+column_constraint = {
+    ^"NOT" ~ ^"NULL"
+  | unique_specification
+  | references_specification
+  | check_constraint_definition
+  }
+
+column_constraint_definition = {
+    ( constraint_name_definition )? ~ column_constraint ~
+    ( constraint_characteristics )?
+  }
+
+column_default_option = {
+    ^"INCLUDING" ~ ^"DEFAULTS"
+  | ^"EXCLUDING" ~ ^"DEFAULTS"
+  }
+
+column_definition = {
+    column_name ~ ( data_type_or_domain_name )? ~
+    ( default_clause | identity_column_specification | generation_clause | system_time_period_start_column_specification | system_time_period_end_column_specification )? ~
+    ( column_constraint_definition )* ~ ( collate_clause )?
+    }
+
+column_definition_1 = {
+    column_definition
+  }
+
+column_definition_2 = {
+    column_definition
+  }
+
+column_name = {
+    identifier
+  }
+
+column_name_list = {
+    column_name ~ (comma ~ column_name)*
+  }
+
+column_option_list = {
+    ( scope_clause )? ~ ( default_clause )? ~ ( column_constraint_definition )*
+  }
+
+column_options = {
+    column_name ~ ^"WITH" ~ ^"OPTIONS" ~ column_option_list
+  }
+
+column_reference = {
+    basic_identifier_chain
+  | ^"MODULE" ~ period ~ qualified_identifier ~ period ~ column_name
+  }
+
+comma = {
+    ","
+  }
+
+comment = {
+    simple_comment
+  | bracketed_comment
+  }
+
+comment_character = {
+    nonquote_character
+  | quote
+  }
+
+commit_statement = {
+    ^"COMMIT" ~ ( ^"WORK" )? ~ ( ^"AND" ~ ( ^"NO" )? ~ ^"CHAIN" )?
+  }
+
+common_logarithm = {
+    ^"LOG10" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+common_sequence_generator_option = {
+    sequence_generator_start_with_option
+  | basic_sequence_generator_option
+  }
+
+common_sequence_generator_options = {
+    common_sequence_generator_option+
+  }
+
+common_value_expression = {
+    numeric_value_expression
+  | string_value_expression
+  | datetime_value_expression
+  | interval_value_expression
+  | user_defined_type_value_expression
+  | reference_value_expression
+  | collection_value_expression
+  }
+
+comp_op = {
+    equals_operator
+  | not_equals_operator
+  | less_than_operator
+  | greater_than_operator
+  | less_than_or_equals_operator
+  | greater_than_or_equals_operator
+  }
+
+comparison_predicate = {
+    row_value_predicand ~ comparison_predicate_part_2
+  }
+
+comparison_predicate_part_2 = {
+    comp_op ~ row_value_predicand
+  }
+
+computational_operation = {
+    ^"AVG"
+  | ^"MAX"
+  | ^"MIN"
+  | ^"SUM"
+  | ^"EVERY"
+  | ^"ANY"
+  | ^"SOME"
+  | ^"COUNT"
+  | ^"STDDEV_POP"
+  | ^"STDDEV_SAMP"
+  | ^"VAR_SAMP"
+  | ^"VAR_POP"
+  | ^"COLLECT"
+  | ^"FUSION"
+  | ^"INTERSECTION"
+  }
+
+concatenation = {
+    character_factor ~ character_value_expression ~ concatenation_operator
+  }
+
+concatenation_operator = {
+    "||"
+  }
+
+condition = {
+    SQL_condition
+  }
+
+condition_action = {
+    ^"CONTINUE"
+  | go_to
+  }
+
+condition_information = {
+    ^"CONDITION" ~ condition_number ~ condition_information_item ~
+    (comma ~ condition_information_item)*
+  }
+
+condition_information_item = {
+    simple_target_specification ~ equals_operator ~
+    condition_information_item_name
+  }
+
+condition_information_item_name = {
+    ^"CATALOG_NAME"
+  | ^"CLASS_ORIGIN"
+  | ^"COLUMN_NAME"
+  | ^"CONDITION_NUMBER"
+  | ^"CONNECTION_NAME"
+  | ^"CONSTRAINT_CATALOG"
+  | ^"CONSTRAINT_NAME"
+  | ^"CONSTRAINT_SCHEMA"
+  | ^"CURSOR_NAME"
+  | ^"MESSAGE_LENGTH"
+  | ^"MESSAGE_OCTET_LENGTH"
+  | ^"MESSAGE_TEXT"
+  | ^"PARAMETER_MODE"
+  | ^"PARAMETER_NAME"
+  | ^"PARAMETER_ORDINAL_POSITION"
+  | ^"RETURNED_SQLSTATE"
+  | ^"ROUTINE_CATALOG"
+  | ^"ROUTINE_NAME"
+  | ^"ROUTINE_SCHEMA"
+  | ^"SCHEMA_NAME"
+  | ^"SERVER_NAME"
+  | ^"SPECIFIC_NAME"
+  | ^"SUBCLASS_ORIGIN"
+  | ^"TABLE_NAME"
+  | ^"TRIGGER_CATALOG"
+  | ^"TRIGGER_NAME"
+  | ^"TRIGGER_SCHEMA"
+  }
+
+condition_number = {
+    simple_value_specification
+  }
+
+connect_statement = {
+    ^"CONNECT" ~ ^"TO" ~ connection_target
+  }
+
+connection_name = {
+    simple_value_specification
+  }
+
+connection_object = {
+    ^"DEFAULT"
+  | connection_name
+  }
+
+connection_target = {
+    SQL_server_name ~ ( ^"AS" ~ connection_name )? ~ ( ^"USER" ~ connection_user_name )?
+  | ^"DEFAULT"
+  }
+
+connection_user_name = {
+    simple_value_specification
+  }
+
+constraint_characteristics = {
+    constraint_check_time ~ ( ( ^"NOT" )? ~ ^"DEFERRABLE" )? ~ ( constraint_enforcement )?
+  | ( ^"NOT" )? ~ ^"DEFERRABLE" ~ ( constraint_check_time )? ~ ( constraint_enforcement )?
+  | constraint_enforcement
+  }
+
+constraint_check_time = {
+    ^"INITIALLY" ~ ^"DEFERRED"
+  | ^"INITIALLY" ~ ^"IMMEDIATE"
+  }
+
+constraint_enforcement = {
+    ( ^"NOT" )? ~ ^"ENFORCED"
+  }
+
+constraint_name = {
+    schema_qualified_name
+  }
+
+constraint_name_definition = {
+    ^"CONSTRAINT" ~ constraint_name
+  }
+
+constraint_name_list = {
+    ^"ALL"
+  | constraint_name ~ (comma ~ constraint_name)*
+  }
+
+constructor_method_selection = {
+    routine_invocation
+  }
+
+contextually_typed_row_value_constructor = {
+    common_value_expression
+  | boolean_value_expression
+  | contextually_typed_value_specification
+  | left_paren ~ contextually_typed_value_specification ~ right_paren
+  | left_paren ~ contextually_typed_row_value_constructor_element ~ comma ~ contextually_typed_row_value_constructor_element_list ~ right_paren
+  | ^"ROW" ~ left_paren ~ contextually_typed_row_value_constructor_element_list ~ right_paren
+  }
+
+contextually_typed_row_value_constructor_element = {
+    value_expression
+  | contextually_typed_value_specification
+  }
+
+contextually_typed_row_value_constructor_element_list = {
+    contextually_typed_row_value_constructor_element ~
+    (comma ~ contextually_typed_row_value_constructor_element)*
+  }
+
+contextually_typed_row_value_expression = {
+    row_value_special_case
+  | contextually_typed_row_value_constructor
+  }
+
+contextually_typed_row_value_expression_list = {
+    contextually_typed_row_value_expression ~
+    (comma ~ contextually_typed_row_value_expression)*
+  }
+
+contextually_typed_table_value_constructor = {
+    ^"VALUES" ~ contextually_typed_row_value_expression_list
+  }
+
+contextually_typed_value_specification = {
+    implicitly_typed_value_specification
+  | default_specification
+  }
+
+conventional_descriptor_name = {
+    non_extended_descriptor_name
+  | extended_descriptor_name
+  }
+
+conventional_dynamic_cursor_name = {
+    cursor_name
+  | extended_cursor_name
+  }
+
+copartition_clause = {
+    ^"COPARTITION" ~ copartition_list
+  }
+
+copartition_list = {
+    copartition_specification ~ (comma ~ copartition_specification)*
+  }
+
+copartition_specification = {
+    left_paren ~ range_variable ~ comma ~ range_variable ~
+    (comma ~ range_variable)* ~ right_paren
+  }
+
+copy_descriptor_options = {
+    ^"NAME"
+  | ^"TYPE"
+  | ^"NAME" ~ comma ~ ^"TYPE"
+  | ^"DATA"
+  }
+
+copy_descriptor_statement = {
+    copy_whole_descriptor_statement
+  | copy_item_descriptor_statement
+  }
+
+copy_item_descriptor_statement = {
+    ^"COPY" ~ source_descriptor_name ~ ^"VALUE" ~ item_number_1 ~ left_paren ~
+    copy_descriptor_options ~ right_paren ~ ^"TO" ~ target_descriptor_name ~ ^"VALUE" ~
+    item_number_2
+  }
+
+copy_whole_descriptor_statement = {
+    ^"COPY" ~ source_descriptor_name ~ ^"TO" ~ target_descriptor_name
+  }
+
+correlation_name = {
+    identifier
+  }
+
+correlation_or_recognition = {
+    ^"AS" ~ correlation_name ~ ( parenthesized_derived_column_list )?
+  | row_pattern_recognition_clause_and_name
+  }
+
+corresponding_column_list = {
+    column_name_list
+  }
+
+corresponding_spec = {
+    ^"CORRESPONDING" ~ ( ^"BY" ~ left_paren ~ corresponding_column_list ~ right_paren )?
+  }
+
+cross_join = {
+    ^"CROSS" ~ ^"JOIN" ~ table_reference
+  }
+
+cube_list = {
+    ^"CUBE" ~ left_paren ~ ordinary_grouping_set_list ~ right_paren
+  }
+
+current_collation_specification = {
+    ^"COLLATION" ~ ^"FOR" ~ left_paren ~ string_value_expression ~ right_paren
+  }
+
+current_date_value_function = {
+    ^"CURRENT_DATE"
+  }
+
+current_local_time_value_function = {
+    ^"LOCALTIME" ~ ( left_paren ~ time_precision ~ right_paren )?
+  }
+
+current_local_timestamp_value_function = {
+    ^"LOCALTIMESTAMP" ~ ( left_paren ~ timestamp_precision ~ right_paren )?
+  }
+
+current_time_value_function = {
+    ^"CURRENT_TIME" ~ ( left_paren ~ time_precision ~ right_paren )?
+  }
+
+current_timestamp_value_function = {
+    ^"CURRENT_TIMESTAMP" ~ ( left_paren ~ timestamp_precision ~ right_paren )?
+  }
+
+cursor_holdability = {
+    ^"WITH" ~ ^"HOLD"
+  | ^"WITHOUT" ~ ^"HOLD"
+  }
+
+cursor_name = {
+    local_qualified_name
+  }
+
+cursor_properties = {
+    ( cursor_sensitivity )? ~ ( cursor_scrollability )? ~ ^"CURSOR" ~
+    ( cursor_holdability )? ~ ( cursor_returnability )?
+  }
+
+cursor_returnability = {
+    ^"WITH" ~ ^"RETURN"
+  | ^"WITHOUT" ~ ^"RETURN"
+  }
+
+cursor_scrollability = {
+    ^"SCROLL"
+  | ^"NO" ~ ^"SCROLL"
+  }
+
+cursor_sensitivity = {
+    ^"SENSITIVE"
+  | ^"INSENSITIVE"
+  | ^"ASENSITIVE"
+  }
+
+cursor_specification = {
+    query_expression ~ ( updatability_clause )?
+  }
+
+cycle_clause = {
+    ^"CYCLE" ~ cycle_column_list ~ ^"SET" ~ cycle_mark_column ~ ^"TO" ~ cycle_mark_value ~
+    ^"DEFAULT" ~ non_cycle_mark_value ~ ^"USING" ~ path_column
+  }
+
+cycle_column = {
+    column_name
+  }
+
+cycle_column_list = {
+    cycle_column ~ (comma ~ cycle_column)*
+  }
+
+cycle_mark_column = {
+    column_name
+  }
+
+cycle_mark_value = {
+    value_expression
+  }
+
+data_change_delta_table = {
+    result_option ~ ^"TABLE" ~ left_paren ~ data_change_statement ~ right_paren
+  }
+
+data_change_statement = {
+    delete_statement_searched
+  | insert_statement
+  | merge_statement
+  | update_statement_searched
+  }
+
+data_type = {
+    scalar_data_type
+  | collection_type
+  }
+
+scalar_data_type = {
+    predefined_type
+  | row_type
+  | path_resolved_user_defined_type_name
+  | reference_type
+  }
+
+data_type_list = {
+    left_paren ~ ( data_type ~ (comma ~ data_type)* )? ~ right_paren
+  }
+
+data_type_or_domain_name = {
+    data_type
+  | domain_name
+  }
+
+date_literal = {
+    ^"DATE" ~ date_string
+  }
+
+date_string = @{
+    quote ~ unquoted_date_string ~ quote
+  }
+
+date_value = @{
+    years_value ~ minus_sign ~ months_value ~ minus_sign ~ days_value
+  }
+
+datetime_factor = {
+    datetime_primary ~ ( time_zone )?
+  }
+
+datetime_literal = {
+    date_literal
+  | time_literal
+  | timestamp_literal
+  }
+
+datetime_primary = {
+    value_expression_primary
+  | datetime_value_function
+  }
+
+datetime_term = {
+    datetime_factor
+  }
+
+datetime_type = {
+    ^"DATE"
+  | ^"TIME" ~ ( left_paren ~ time_precision ~ right_paren )? ~ ( with_or_without_time_zone )?
+  | ^"TIMESTAMP" ~ ( left_paren ~ timestamp_precision ~ right_paren )? ~ ( with_or_without_time_zone )?
+  }
+
+datetime_value = {
+    unsigned_integer
+  }
+
+datetime_value_expression = {
+    datetime_term
+  | interval_value_expression ~ plus_sign ~ datetime_term
+  | left_paren ~ datetime_value_expression ~ right_paren ~ (plus_sign | minus_sign) ~ interval_term
+  }
+
+datetime_value_function = {
+    current_date_value_function
+  | current_time_value_function
+  | current_timestamp_value_function
+  | current_local_time_value_function
+  | current_local_timestamp_value_function
+  }
+
+day_time_interval = {
+    days_value ~
+    ( space ~ hours_value ~ ( colon ~ minutes_value ~ ( colon ~ seconds_value )? )? )?
+  }
+
+day_time_literal = {
+    day_time_interval
+  | time_interval
+  }
+
+days_value = {
+    datetime_value
+  }
+
+deallocate_descriptor_statement = {
+    ^"DEALLOCATE" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ conventional_descriptor_name
+  }
+
+deallocate_prepared_statement = {
+    ^"DEALLOCATE" ~ ^"PREPARE" ~ SQL_statement_name
+  }
+
+decimal_floating_point_type = {
+    ^"DECFLOAT" ~ ( left_paren ~ precision ~ right_paren )?
+  }
+
+declare_cursor = {
+    ^"DECLARE" ~ cursor_name ~ cursor_properties ~ ^"FOR" ~ cursor_specification
+  }
+
+default_clause = {
+    ^"DEFAULT" ~ default_option
+  }
+
+default_expression = {
+    value_expression
+  }
+
+default_option = {
+    literal
+  | datetime_value_function
+  | ^"USER"
+  | ^"CURRENT_USER"
+  | ^"CURRENT_ROLE"
+  | ^"SESSION_USER"
+  | ^"SYSTEM_USER"
+  | ^"CURRENT_CATALOG"
+  | ^"CURRENT_SCHEMA"
+  | ^"CURRENT_PATH"
+  | implicitly_typed_value_specification
+  }
+
+default_specification = {
+    ^"DEFAULT"
+  }
+
+delete_rule = {
+    ^"ON" ~ ^"DELETE" ~ referential_action
+  }
+
+delete_statement_positioned = {
+    ^"DELETE" ~ ^"FROM" ~ target_table ~ ( ( ^"AS" )? ~ correlation_name )? ~ ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~
+    cursor_name
+  }
+
+delete_statement_searched = {
+    ^"DELETE" ~ ^"FROM" ~ target_table ~
+    ( ^"FOR" ~ ^"PORTION" ~ ^"OF" ~ application_time_period_name ~ ^"FROM" ~ point_in_time_1 ~ ^"TO" ~ point_in_time_2 )? ~
+    ( ( ^"AS" )? ~ correlation_name )? ~ ( ^"WHERE" ~ search_condition )?
+  }
+
+delimited_identifier = {
+    double_quote ~ delimited_identifier_body ~ double_quote
+  }
+
+delimited_identifier_body = {
+    delimited_identifier_part+
+  }
+
+delimited_identifier_part = {
+    nondoublequote_character
+  | doublequote_symbol
+  }
+
+delimiter_token = {
+    character_string_literal
+  | date_string
+  | time_string
+  | timestamp_string
+  | interval_string
+  | delimited_identifier
+  | SQL_special_character
+  | not_equals_operator
+  | greater_than_or_equals_operator
+  | less_than_or_equals_operator
+  | concatenation_operator
+  | right_arrow
+  | left_bracket_trigraph
+  | right_bracket_trigraph
+  | double_colon
+  | double_period
+  | named_argument_assignment_token
+  | left_brace_minus
+  | right_minus_brace
+  }
+
+dependent_variable_expression = {
+    numeric_value_expression
+  }
+
+derived_column = {
+    value_expression ~ ( as_clause )?
+  }
+
+derived_column_list = {
+    column_name_list
+  }
+
+derived_representation = {
+    ^"REF" ~ ^"FROM" ~ list_of_attributes
+  }
+
+derived_table = {
+    table_subquery
+  }
+
+describe_input_statement = {
+    ^"DESCRIBE" ~ ^"INPUT" ~ SQL_statement_name ~ using_descriptor ~ ( nesting_option )?
+  }
+
+describe_output_statement = {
+    ^"DESCRIBE" ~ ( ^"OUTPUT" )? ~ described_object ~ using_descriptor ~ ( nesting_option )?
+  }
+
+describe_statement = {
+    describe_input_statement
+  | describe_output_statement
+  }
+
+described_object = {
+    SQL_statement_name
+  | ^"CURSOR" ~ cursor_name ~ ^"STRUCTURE"
+  }
+
+descriptor_argument = {
+    descriptor_value_constructor
+  | ^"CAST" ~ left_paren ~ ^"NULL" ~ ^"AS" ~ ^"DESCRIPTOR" ~ right_paren
+  }
+
+descriptor_column_list = {
+    descriptor_column_specification ~
+    (comma ~ descriptor_column_specification)*
+  }
+
+descriptor_column_specification = {
+    column_name ~ ( data_type )?
+  }
+
+descriptor_item_name = {
+    ^"CARDINALITY"
+  | ^"CHARACTER_SET_CATALOG"
+  | ^"CHARACTER_SET_NAME"
+  | ^"CHARACTER_SET_SCHEMA"
+  | ^"COLLATION_CATALOG"
+  | ^"COLLATION_NAME"
+  | ^"COLLATION_SCHEMA"
+  | ^"DATA"
+  | ^"DATETIME_INTERVAL_CODE"
+  | ^"DATETIME_INTERVAL_PRECISION"
+  | ^"DEGREE"
+  | ^"INDICATOR"
+  | ^"KEY_MEMBER"
+  | ^"LENGTH"
+  | ^"LEVEL"
+  | ^"NAME"
+  | ^"NULLABLE"
+  | ^"NULL_ORDERING"
+  | ^"OCTET_LENGTH"
+  | ^"PARAMETER_MODE"
+  | ^"PARAMETER_ORDINAL_POSITION"
+  | ^"PARAMETER_SPECIFIC_CATALOG"
+  | ^"PARAMETER_SPECIFIC_NAME"
+  | ^"PARAMETER_SPECIFIC_SCHEMA"
+  | ^"PRECISION"
+  | ^"RETURNED_CARDINALITY"
+  | ^"RETURNED_LENGTH"
+  | ^"RETURNED_OCTET_LENGTH"
+  | ^"SCALE"
+  | ^"SCOPE_CATALOG"
+  | ^"SCOPE_NAME"
+  | ^"SCOPE_SCHEMA"
+  | ^"SORT_DIRECTION"
+  | ^"TYPE"
+  | ^"UNNAMED"
+  | ^"USER_DEFINED_TYPE_CATALOG"
+  | ^"USER_DEFINED_TYPE_NAME"
+  | ^"USER_DEFINED_TYPE_SCHEMA"
+  | ^"USER_DEFINED_TYPE_CODE"
+  }
+
+descriptor_name = {
+    conventional_descriptor_name
+  | PTF_descriptor_name
+  }
+
+descriptor_parameter_type = {
+    ^"DESCRIPTOR"
+  }
+
+descriptor_value_constructor = {
+    ^"DESCRIPTOR" ~ left_paren ~ descriptor_column_list ~ right_paren
+  }
+
+deterministic_characteristic = {
+    ^"DETERMINISTIC"
+  | ^"NOT" ~ ^"DETERMINISTIC"
+  }
+
+diagnostics_size = {
+    ^"DIAGNOSTICS" ~ ^"SIZE" ~ number_of_conditions
+  }
+
+digit = {
+    ^"0"
+  | ^"1"
+  | ^"2"
+  | ^"3"
+  | ^"4"
+  | ^"5"
+  | ^"6"
+  | ^"7"
+  | ^"8"
+  | ^"9"
+  }
+
+direct_invocation = {
+    value_expression_primary ~ period ~ method_name ~ ( SQL_argument_list )?
+  }
+
+disconnect_object = {
+    connection_object
+  | ^"ALL"
+  | ^"CURRENT"
+  }
+
+disconnect_statement = {
+    ^"DISCONNECT" ~ disconnect_object
+  }
+
+dispatch_clause = {
+    ^"STATIC" ~ ^"DISPATCH"
+  }
+
+distinct_predicate = {
+    row_value_predicand_3 ~ distinct_predicate_part_2
+  }
+
+distinct_predicate_part_2 = {
+    ^"IS" ~ ( ^"NOT" )? ~ ^"DISTINCT" ~ ^"FROM" ~ row_value_predicand_4
+  }
+
+dollar_sign = {
+    "$"
+  }
+
+domain_constraint = {
+    ( constraint_name_definition )? ~ check_constraint_definition ~
+    ( constraint_characteristics )?
+  }
+
+domain_definition = {
+    ^"CREATE" ~ ^"DOMAIN" ~ domain_name ~ ( ^"AS" )? ~ predefined_type ~ ( default_clause )? ~
+    ( domain_constraint )* ~ ( collate_clause )?
+  }
+
+domain_name = {
+    schema_qualified_name
+  }
+
+double_colon = {
+    "::"
+  }
+
+double_period = {
+    ".."
+  }
+
+double_quote = {
+    "\""
+  }
+
+doublequote_symbol = {
+    "\"\""
+  }
+
+drop_assertion_statement = {
+    ^"DROP" ~ ^"ASSERTION" ~ constraint_name ~ ( drop_behavior )?
+  }
+
+drop_attribute_definition = {
+    ^"DROP" ~ ^"ATTRIBUTE" ~ attribute_name ~ ^"RESTRICT"
+  }
+
+drop_behavior = {
+    ^"CASCADE"
+  | ^"RESTRICT"
+  }
+
+drop_character_set_statement = {
+    ^"DROP" ~ ^"CHARACTER" ~ ^"SET" ~ character_set_name
+  }
+
+drop_collation_statement = {
+    ^"DROP" ~ ^"COLLATION" ~ collation_name ~ drop_behavior
+  }
+
+drop_column_default_clause = {
+    ^"DROP" ~ ^"DEFAULT"
+  }
+
+drop_column_definition = {
+    ^"DROP" ~ ( ^"COLUMN" )? ~ column_name ~ drop_behavior
+  }
+
+drop_column_generation_expression_clause = {
+    ^"DROP" ~ ^"EXPRESSION"
+  }
+
+drop_column_not_null_clause = {
+    ^"DROP" ~ ^"NOT" ~ ^"NULL"
+  }
+
+drop_column_scope_clause = {
+    ^"DROP" ~ ^"SCOPE" ~ drop_behavior
+  }
+
+drop_data_type_statement = {
+    ^"DROP" ~ ^"TYPE" ~ schema_resolved_user_defined_type_name ~ drop_behavior
+  }
+
+drop_domain_constraint_definition = {
+    ^"DROP" ~ ^"CONSTRAINT" ~ constraint_name
+  }
+
+drop_domain_default_clause = {
+    ^"DROP" ~ ^"DEFAULT"
+  }
+
+drop_domain_statement = {
+    ^"DROP" ~ ^"DOMAIN" ~ domain_name ~ drop_behavior
+  }
+
+drop_identity_property_clause = {
+    ^"DROP" ~ ^"IDENTITY"
+  }
+
+drop_method_specification = {
+    ^"DROP" ~ specific_method_specification_designator ~ ^"RESTRICT"
+  }
+
+drop_role_statement = {
+    ^"DROP" ~ ^"ROLE" ~ role_name
+  }
+
+drop_routine_statement = {
+    ^"DROP" ~ specific_routine_designator ~ drop_behavior
+  }
+
+drop_schema_statement = {
+    ^"DROP" ~ ^"SCHEMA" ~ schema_name ~ drop_behavior
+  }
+
+drop_sequence_generator_statement = {
+    ^"DROP" ~ ^"SEQUENCE" ~ sequence_generator_name ~ drop_behavior
+  }
+
+drop_system_versioning_clause = {
+    ^"DROP" ~ ^"SYSTEM" ~ ^"VERSIONING" ~ drop_behavior
+  }
+
+drop_table_constraint_definition = {
+    ^"DROP" ~ ^"CONSTRAINT" ~ constraint_name ~ drop_behavior
+  }
+
+drop_table_period_definition = {
+    ^"DROP" ~ system_or_application_time_period_specification ~ drop_behavior
+  }
+
+drop_table_statement = {
+    ^"DROP" ~ ^"TABLE" ~ table_name ~ drop_behavior
+  }
+
+drop_transform_element_list = {
+    ^"DROP" ~ left_paren ~ transform_kind ~ ( comma ~ transform_kind )? ~
+    drop_behavior ~ right_paren
+  }
+
+drop_transform_statement = {
+    ^"DROP" ~ ( ^"TRANSFORM" | ^"TRANSFORMS" ) ~ transforms_to_be_dropped ~ ^"FOR" ~
+    schema_resolved_user_defined_type_name ~ drop_behavior
+  }
+
+drop_transliteration_statement = {
+    ^"DROP" ~ ^"TRANSLATION" ~ transliteration_name
+  }
+
+drop_trigger_statement = {
+    ^"DROP" ~ ^"TRIGGER" ~ trigger_name
+  }
+
+drop_user_defined_cast_statement = {
+    ^"DROP" ~ ^"CAST" ~ left_paren ~ source_data_type ~ ^"AS" ~ target_data_type ~ right_paren ~
+    drop_behavior
+  }
+
+drop_user_defined_ordering_statement = {
+    ^"DROP" ~ ^"ORDERING" ~ ^"FOR" ~ schema_resolved_user_defined_type_name ~ drop_behavior
+  }
+
+drop_view_statement = {
+    ^"DROP" ~ ^"VIEW" ~ table_name ~ drop_behavior
+  }
+
+dynamic_close_statement = {
+    ^"CLOSE" ~ conventional_dynamic_cursor_name
+  }
+
+dynamic_cursor_name = {
+    conventional_dynamic_cursor_name
+  | PTF_cursor_name
+  }
+
+dynamic_declare_cursor = {
+    ^"DECLARE" ~ cursor_name ~ cursor_properties ~ ^"FOR" ~ statement_name
+  }
+
+dynamic_delete_statement_positioned = {
+    ^"DELETE" ~ ^"FROM" ~ target_table ~ ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~ conventional_dynamic_cursor_name
+  }
+
+dynamic_fetch_statement = {
+    ^"FETCH" ~ ( ( fetch_orientation )? ~ ^"FROM" )? ~ dynamic_cursor_name ~
+    output_using_clause
+  }
+
+dynamic_open_statement = {
+    ^"OPEN" ~ conventional_dynamic_cursor_name ~ ( input_using_clause )?
+  }
+
+dynamic_parameter_specification = {
+    question_mark
+  }
+
+dynamic_select_statement = {
+    cursor_specification
+  }
+
+dynamic_single_row_select_statement = {
+    query_specification
+  }
+
+dynamic_update_statement_positioned = {
+    ^"UPDATE" ~ target_table ~ ^"SET" ~ set_clause_list ~ ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~
+    conventional_dynamic_cursor_name
+  }
+
+else_clause = {
+    ^"ELSE" ~ result
+  }
+
+embedded_SQL_begin_declare = {
+    SQL_prefix ~ ^"BEGIN" ~ ^"DECLARE" ~ ^"SECTION" ~ ( SQL_terminator )?
+  }
+
+embedded_SQL_declare_section = {
+    embedded_SQL_begin_declare ~ ( embedded_character_set_declaration )? ~
+    embedded_SQL_end_declare
+  }
+
+embedded_SQL_end_declare = {
+    SQL_prefix ~ ^"END" ~ ^"DECLARE" ~ ^"SECTION" ~ ( SQL_terminator )?
+  }
+
+embedded_SQL_statement = {
+    SQL_prefix ~ statement_or_declaration ~ ( SQL_terminator )?
+  }
+
+embedded_authorization_clause = {
+    ^"SCHEMA" ~ schema_name
+  | ^"AUTHORIZATION" ~ embedded_authorization_identifier ~ ( ^"FOR" ~ ^"STATIC" ~ ( ^"ONLY" | ( ^"AND" ~ ^"DYNAMIC" ) ) )?
+  | ^"SCHEMA" ~ schema_name ~ ^"AUTHORIZATION" ~ embedded_authorization_identifier ~ ( ^"FOR" ~ ^"STATIC" ~ ( ^"ONLY" | ( ^"AND" ~ ^"DYNAMIC" ) ) )?
+  }
+
+embedded_authorization_declaration = {
+    ^"DECLARE" ~ embedded_authorization_clause
+  }
+
+embedded_authorization_identifier = {
+    module_authorization_identifier
+  }
+
+embedded_character_set_declaration = {
+    ^"SQL" ~ ^"NAMES" ~ ^"ARE" ~ character_set_specification
+  }
+
+embedded_collation_specification = {
+    module_collations
+  }
+
+embedded_exception_declaration = {
+    ^"WHENEVER" ~ condition ~ condition_action
+  }
+
+embedded_path_specification = {
+    path_specification
+  }
+
+embedded_transform_group_specification = {
+    transform_group_specification
+  }
+
+embedded_variable_name = {
+    colon ~ host_identifier
+  }
+
+embedded_variable_specification = {
+    embedded_variable_name ~ ( indicator_variable )?
+  }
+
+empty_grouping_set = {
+    left_paren ~ right_paren
+  }
+
+empty_specification = {
+    ^"ARRAY" ~ left_bracket_or_trigraph ~ right_bracket_or_trigraph
+  | ^"MULTISET" ~ left_bracket_or_trigraph ~ right_bracket_or_trigraph
+  }
+
+end_field = {
+    non_second_primary_datetime_field
+  | ^"SECOND" ~ ( left_paren ~ interval_fractional_seconds_precision ~ right_paren )?
+  }
+
+equals_operator = {
+    "="
+  }
+
+equals_ordering_form = {
+    ^"EQUALS" ~ ^"ONLY" ~ ^"BY" ~ ordering_category
+  }
+
+escape_character = {
+    character_value_expression
+  }
+
+escape_octet = {
+    binary_value_expression
+  }
+
+escaped_character = {
+    PUSH(escape_character) ~
+    (POP
+    | left_bracket
+    | right_bracket
+    | left_paren
+    | right_paren
+    | vertical_bar
+    | circumflex
+    | minus_sign
+    | plus_sign
+    | asterisk
+    | underscore
+    | percent
+    | question_mark
+    | left_brace)
+  }
+
+exact_numeric_literal = @{
+    unsigned_integer ~ ( period ~ ( unsigned_integer )? )?
+  | period ~ unsigned_integer
+  }
+
+exact_numeric_type = {
+    ^"NUMERIC" ~ ( left_paren ~ precision ~ ( comma ~ scale )? ~ right_paren )?
+  | ^"DECIMAL" ~ ( left_paren ~ precision ~ ( comma ~ scale )? ~ right_paren )?
+  | ^"DEC" ~ ( left_paren ~ precision ~ ( comma ~ scale )? ~ right_paren )?
+  | ^"SMALLINT"
+  | ^"INTEGER"
+  | ^"INT"
+  | ^"BIGINT"
+  }
+
+exclusive_user_defined_type_specification = {
+    ^"ONLY" ~ path_resolved_user_defined_type_name
+  }
+
+execute_immediate_statement = {
+    ^"EXECUTE" ~ ^"IMMEDIATE" ~ SQL_statement_variable
+  }
+
+execute_statement = {
+    ^"EXECUTE" ~ SQL_statement_name ~ ( result_using_clause )? ~
+    ( parameter_using_clause )?
+  }
+
+existing_collation_name = {
+    collation_name
+  }
+
+existing_transliteration_name = {
+    transliteration_name
+  }
+
+existing_window_name = {
+    window_name
+  }
+
+exists_predicate = {
+    ^"EXISTS" ~ table_subquery
+  }
+
+explicit_row_value_constructor = {
+    left_paren ~ row_value_constructor_element ~ comma ~
+    row_value_constructor_element_list ~ right_paren
+  | ^"ROW" ~ left_paren ~ row_value_constructor_element_list ~ right_paren
+  | row_subquery
+  }
+
+explicit_table = {
+    ^"TABLE" ~ table_or_query_name
+  }
+
+exponent = {
+    signed_integer
+  }
+
+exponential_function = {
+    ^"EXP" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+extended_cursor_name = {
+    ( scope_option )? ~ simple_value_specification
+  }
+
+extended_descriptor_name = {
+    ( scope_option )? ~ simple_value_specification
+  }
+
+extended_statement_name = {
+    ( scope_option )? ~ simple_value_specification
+  }
+
+external_body_reference = {
+    ^"EXTERNAL" ~ ( ^"NAME" ~ external_routine_name )? ~ ( parameter_style_clause )? ~
+    ( transform_group_specification )? ~ ( external_security_clause )?
+  }
+
+external_routine_name = {
+    identifier
+  | character_string_literal
+  }
+
+external_security_clause = {
+    ^"EXTERNAL" ~ ^"SECURITY" ~ ^"DEFINER"
+  | ^"EXTERNAL" ~ ^"SECURITY" ~ ^"INVOKER"
+  | ^"EXTERNAL" ~ ^"SECURITY" ~ ^"IMPLEMENTATION" ~ ^"DEFINED"
+  }
+
+externally_invoked_procedure = {
+    ^"PROCEDURE" ~ procedure_name ~ host_parameter_declaration_list ~ semicolon ~
+    SQL_procedure_statement ~ semicolon
+  }
+
+extract_expression = {
+    ^"EXTRACT" ~ left_paren ~ extract_field ~ ^"FROM" ~ extract_source ~ right_paren
+  }
+
+extract_field = {
+    primary_datetime_field
+  | time_zone_field
+  }
+
+extract_source = {
+    datetime_value_expression
+  | interval_value_expression
+  }
+
+factor = @{
+    ( sign )? ~ numeric_primary
+  }
+
+fetch_first_clause = {
+    ^"FETCH" ~ ( ^"FIRST" | ^"NEXT" ) ~ ( fetch_first_quantity )? ~ ( ^"ROW" | ^"ROWS" ) ~
+    ( ^"ONLY" | (^"WITH" ~ ^"TIES") )
+  }
+
+fetch_first_percentage = {
+    simple_value_specification ~ ^"PERCENT"
+  }
+
+fetch_first_quantity = {
+    fetch_first_row_count
+  | fetch_first_percentage
+  }
+
+fetch_first_row_count = {
+    simple_value_specification
+  }
+
+fetch_orientation = {
+    ^"NEXT"
+  | ^"PRIOR"
+  | ^"FIRST"
+  | ^"LAST"
+  | ( ^"ABSOLUTE" | ^"RELATIVE" ) ~ simple_value_specification
+  }
+
+fetch_statement = {
+    ^"FETCH" ~ ( ( fetch_orientation )? ~ ^"FROM" )? ~ cursor_name ~ ^"INTO" ~ fetch_target_list
+  }
+
+fetch_target_list = {
+    target_specification ~ (comma ~ target_specification)*
+  }
+
+field_definition = {
+    field_name ~ data_type
+  }
+
+field_name = {
+    identifier
+  }
+
+field_reference = {
+    ^"FIELD" ~ left_paren ~ value_expression_primary ~ period ~ field_name ~ right_paren
+  }
+
+filter_clause = {
+    ^"FILTER" ~ left_paren ~ ^"WHERE" ~ search_condition ~ right_paren
+  }
+
+finality = {
+    ^"FINAL"
+  | ^"NOT" ~ ^"FINAL"
+  }
+
+first_or_last = {
+    ^"FIRST"
+  | ^"LAST"
+  }
+
+first_or_last_value = {
+    ^"FIRST_VALUE"
+  | ^"LAST_VALUE"
+  }
+
+first_or_last_value_function = {
+    first_or_last_value ~ left_paren ~ value_expression ~ right_paren ~
+    ( null_treatment )?
+  }
+
+floor_function = {
+    ^"FLOOR" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+fold = {
+    ( ^"UPPER" | ^"LOWER" ) ~ left_paren ~ character_value_expression ~ right_paren
+  }
+
+free_locator_statement = {
+    ^"FREE" ~ ^"LOCATOR" ~ locator_reference ~ (comma ~ locator_reference)*
+  }
+
+from_clause = {
+    ^"FROM" ~ table_reference_list
+  }
+
+from_constructor = {
+    ( left_paren ~ insert_column_list ~ right_paren )? ~ ( override_clause )? ~
+    contextually_typed_table_value_constructor
+  }
+
+from_default = {
+    ^"DEFAULT" ~ ^"VALUES"
+  }
+
+from_first_or_last = {
+    ^"FROM" ~ ^"FIRST"
+  | ^"FROM" ~ ^"LAST"
+  }
+
+from_sql = {
+    ^"FROM" ~ ^"SQL" ~ ^"WITH" ~ from_sql_function
+  }
+
+from_sql_function = {
+    specific_routine_designator
+  }
+
+from_subquery = {
+    ( left_paren ~ insert_column_list ~ right_paren )? ~ ( override_clause )? ~
+    query_expression
+  }
+
+full_ordering_form = {
+    ^"ORDER" ~ ^"FULL" ~ ^"BY" ~ ordering_category
+  }
+
+function_specification = {
+    ^"FUNCTION" ~ schema_qualified_routine_name ~ SQL_parameter_declaration_list ~
+    returns_clause ~ routine_characteristics ~ ( dispatch_clause )?
+  }
+
+general_literal = {
+    character_string_literal
+  | national_character_string_literal
+  | Unicode_character_string_literal
+  | binary_string_literal
+  | datetime_literal
+  | interval_literal
+  | boolean_literal
+  }
+
+general_logarithm_argument = {
+    numeric_value_expression
+  }
+
+general_logarithm_base = {
+    numeric_value_expression
+  }
+
+general_logarithm_function = {
+    ^"LOG" ~ left_paren ~ general_logarithm_base ~ comma ~ general_logarithm_argument ~
+    right_paren
+  }
+
+general_set_function = {
+    set_function_type ~ left_paren ~ ( set_quantifier )? ~ value_expression ~ right_paren
+  }
+
+general_value_specification = {
+    host_parameter_specification
+//   | SQL_parameter_reference
+  | dynamic_parameter_specification
+  | embedded_variable_specification
+  | current_collation_specification
+  | ^"CURRENT_CATALOG"
+  | ^"CURRENT_DEFAULT_TRANSFORM_GROUP"
+  | ^"CURRENT_PATH"
+  | ^"CURRENT_ROLE"
+  | ^"CURRENT_SCHEMA"
+  | ^"CURRENT_TRANSFORM_GROUP_FOR_TYPE" ~ path_resolved_user_defined_type_name
+  | ^"CURRENT_USER"
+  | ^"SESSION_USER"
+  | ^"SYSTEM_USER"
+  | ^"USER"
+  | ^"VALUE"
+  }
+
+generalized_expression = {
+    value_expression ~ ^"AS" ~ path_resolved_user_defined_type_name
+  }
+
+generalized_invocation = {
+    left_paren ~ value_expression_primary ~ ^"AS" ~ data_type ~ right_paren ~ period ~
+    method_name ~ ( SQL_argument_list )?
+  }
+
+generation_clause = {
+    generation_rule ~ ^"AS" ~ generation_expression
+  }
+
+generation_expression = {
+    left_paren ~ value_expression ~ right_paren
+  }
+
+generation_option = {
+    ^"INCLUDING" ~ ^"GENERATED"
+  | ^"EXCLUDING" ~ ^"GENERATED"
+  }
+
+generation_rule = {
+    ^"GENERATED" ~ ^"ALWAYS"
+  }
+
+generic_table_parameter_type = {
+    ^"TABLE" ~ ( pass_through_option )? ~ ( generic_table_semantics )?
+  }
+
+generic_table_pruning = {
+    ^"PRUNE" ~ ^"ON" ~ ^"EMPTY"
+  | ^"KEEP" ~ ^"ON" ~ ^"EMPTY"
+  }
+
+generic_table_semantics = {
+    ^"WITH" ~ ^"ROW" ~ ^"SEMANTICS"
+  | ^"WITH" ~ ^"SET" ~ ^"SEMANTICS" ~ ( generic_table_pruning )?
+  }
+
+get_descriptor_information = {
+    get_header_information ~ (comma ~ get_header_information)*
+  | ^"VALUE" ~ item_number ~ get_item_information ~ (comma ~ get_item_information)*
+  }
+
+get_descriptor_statement = {
+    ^"GET" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ descriptor_name ~ get_descriptor_information
+  }
+
+get_diagnostics_statement = {
+    ^"GET" ~ ^"DIAGNOSTICS" ~ SQL_diagnostics_information
+  }
+
+get_header_information = {
+    simple_target_specification_1 ~ equals_operator ~ header_item_name
+  }
+
+get_item_information = {
+    simple_target_specification_2 ~ equals_operator ~ descriptor_item_name
+  }
+
+global_or_local = {
+    ^"GLOBAL"
+  | ^"LOCAL"
+  }
+
+go_to = {
+    ( ^"GOTO" | (^"GO" ~ ^"TO") ) ~ goto_target
+  }
+
+goto_target = {
+    host_label_identifier
+  | unsigned_integer
+  }
+
+grant_privilege_statement = {
+    ^"GRANT" ~ privileges ~ ^"TO" ~ grantee ~ (comma ~ grantee)* ~
+    ( ^"WITH" ~ ^"HIERARCHY" ~ ^"OPTION" )? ~ ( ^"WITH" ~ ^"GRANT" ~ ^"OPTION" )? ~ ( ^"GRANTED" ~ ^"BY" ~ grantor )?
+  }
+
+grant_role_statement = {
+    ^"GRANT" ~ role_granted ~ (comma ~ role_granted)* ~ ^"TO" ~ grantee ~
+    (comma ~ grantee)* ~ ( ^"WITH" ~ ^"ADMIN" ~ ^"OPTION" )? ~
+    ( ^"GRANTED" ~ ^"BY" ~ grantor )?
+  }
+
+grant_statement = {
+    grant_privilege_statement
+  | grant_role_statement
+  }
+
+grantee = {
+    ^"PUBLIC"
+  | authorization_identifier
+  }
+
+grantor = {
+    ^"CURRENT_USER"
+  | ^"CURRENT_ROLE"
+  }
+
+greater_than_operator = {
+    ">"
+  }
+
+greater_than_or_equals_operator = {
+    ">="
+  }
+
+group_by_clause = {
+    ^"GROUP" ~ ^"BY" ~ ( set_quantifier )? ~ grouping_element_list
+  }
+
+group_name = {
+    identifier
+  }
+
+group_specification = {
+    group_name ~ ^"FOR" ~ ^"TYPE" ~ path_resolved_user_defined_type_name
+  }
+
+grouping_column_reference = {
+    column_reference ~ ( collate_clause )?
+  }
+
+grouping_column_reference_list = {
+    grouping_column_reference ~ (comma ~ grouping_column_reference)*
+  }
+
+grouping_element = {
+    ordinary_grouping_set
+  | rollup_list
+  | cube_list
+  | grouping_sets_specification
+  | empty_grouping_set
+  }
+
+grouping_element_list = {
+    grouping_element ~ (comma ~ grouping_element)*
+  }
+
+grouping_operation = {
+    ^"GROUPING" ~ left_paren ~ column_reference ~ (comma ~ column_reference)* ~
+    right_paren
+  }
+
+grouping_set = {
+    ordinary_grouping_set
+  | rollup_list
+  | cube_list
+  | grouping_sets_specification
+  | empty_grouping_set
+  }
+
+grouping_set_list = {
+    grouping_set ~ (comma ~ grouping_set)*
+  }
+
+grouping_sets_specification = {
+    ^"GROUPING" ~ ^"SETS" ~ left_paren ~ grouping_set_list ~ right_paren
+  }
+
+having_clause = {
+    ^"HAVING" ~ search_condition
+  }
+
+header_item_name = {
+    ^"COUNT"
+  | ^"KEY_TYPE"
+  | ^"DYNAMIC_FUNCTION"
+  | ^"DYNAMIC_FUNCTION_CODE"
+  | ^"TOP_LEVEL_COUNT"
+  }
+
+hexit = {
+    digit
+  | ^"A"
+  | ^"B"
+  | ^"C"
+  | ^"D"
+  | ^"E"
+  | ^"F"
+  | ^"a"
+  | ^"b"
+  | ^"c"
+  | ^"d"
+  | ^"e"
+  | ^"f"
+  }
+
+high_value = {
+    unsigned_integer
+  }
+
+hold_locator_statement = {
+    ^"HOLD" ~ ^"LOCATOR" ~ locator_reference ~ (comma ~ locator_reference)*
+  }
+
+host_identifier = {
+    identifier
+  }
+
+host_label_identifier = {
+    host_identifier
+  }
+
+host_parameter_data_type = {
+    data_type ~ ( locator_indication )?
+  }
+
+host_parameter_declaration = {
+    host_parameter_name ~ host_parameter_data_type
+  | status_parameter
+  }
+
+host_parameter_declaration_list = {
+    left_paren ~ host_parameter_declaration ~
+    (comma ~ host_parameter_declaration)* ~ right_paren
+  }
+
+host_parameter_name = {
+    colon ~ identifier
+  }
+
+host_parameter_specification = {
+    host_parameter_name ~ ( indicator_parameter )?
+  }
+
+hours_value = {
+    datetime_value
+  }
+
+hypothetical_set_function = {
+    rank_function_type ~ left_paren ~
+    hypothetical_set_function_value_expression_list ~ right_paren ~
+    within_group_specification
+  }
+
+hypothetical_set_function_value_expression_list = {
+    value_expression ~ (comma ~ value_expression)*
+  }
+
+identifier = @{
+    actual_identifier
+  }
+
+identifier_body = @{
+    identifier_start ~ ( identifier_part )*
+  }
+
+identifier_chain = {
+    identifier ~ (period ~ identifier)*
+  }
+
+identifier_extend = {
+    CONNECTOR_PUNCTUATION
+  }
+
+identifier_part = {
+    identifier_start
+  | identifier_extend
+  }
+
+identifier_start = {
+    LETTER | NUMBER
+  }
+
+identity_column_restart_option = {
+    ^"CONTINUE" ~ ^"IDENTITY"
+  | ^"RESTART" ~ ^"IDENTITY"
+  }
+
+identity_column_specification = {
+    ^"GENERATED" ~ ( ^"ALWAYS" | (^"BY" ~ ^"DEFAULT") ) ~ ^"AS" ~ ^"IDENTITY" ~
+    ( left_paren ~ common_sequence_generator_options ~ right_paren )?
+  }
+
+identity_option = {
+    ^"INCLUDING" ~ ^"IDENTITY"
+  | ^"EXCLUDING" ~ ^"IDENTITY"
+  }
+
+implementation_defined_character_set_name = {
+    character_set_name
+  }
+
+implicitly_typed_value_specification = {
+    null_specification
+  | empty_specification
+  }
+
+in_predicate = {
+    row_value_predicand ~ in_predicate_part_2
+  }
+
+in_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"IN" ~ in_predicate_value
+  }
+
+in_predicate_value = {
+    table_subquery
+  | left_paren ~ in_value_list ~ right_paren
+  }
+
+in_value_list = {
+    row_value_expression ~ (comma ~ row_value_expression)*
+  }
+
+in_line_window_specification = {
+    window_specification
+  }
+
+inclusive_user_defined_type_specification = {
+    path_resolved_user_defined_type_name
+  }
+
+independent_variable_expression = {
+    numeric_value_expression
+  }
+
+indicator_parameter = {
+    ( ^"INDICATOR" )? ~ host_parameter_name
+  }
+
+indicator_variable = {
+    ( ^"INDICATOR" )? ~ embedded_variable_name
+  }
+
+input_using_clause = {
+    using_arguments
+  | using_input_descriptor
+  }
+
+insert_column_list = {
+    column_name_list
+  }
+
+insert_columns_and_source = {
+    from_subquery
+  | from_constructor
+  | from_default
+  }
+
+insert_statement = {
+    ^"INSERT" ~ ^"INTO" ~ insertion_target ~ insert_columns_and_source
+  }
+
+insertion_target = {
+    table_name
+  }
+
+instantiable_clause = {
+    ^"INSTANTIABLE"
+  | ^"NOT" ~ ^"INSTANTIABLE"
+  }
+
+interval_absolute_value_function = {
+    ^"ABS" ~ left_paren ~ interval_value_expression ~ right_paren
+  }
+
+interval_factor = {
+    ( sign )? ~ interval_primary
+  }
+
+interval_fractional_seconds_precision = {
+    unsigned_integer
+  }
+
+interval_leading_field_precision = {
+    unsigned_integer
+  }
+
+interval_literal = {
+    ^"INTERVAL" ~ ( sign )? ~ interval_string ~ interval_qualifier
+  }
+
+interval_primary = {
+    value_expression_primary ~ ( interval_qualifier )?
+  | interval_value_function
+  }
+
+interval_qualifier = {
+    start_field ~ ^"TO" ~ end_field
+  | single_datetime_field
+  }
+
+interval_string = {
+    quote ~ unquoted_interval_string ~ quote
+  }
+
+interval_term = {
+    interval_factor
+//  | interval_term ~ (asterisk | solidus) ~ factor; don't support this operations with intervals for now
+  | term ~ asterisk ~ interval_factor
+  }
+
+interval_type = {
+    ^"INTERVAL" ~ interval_qualifier
+  }
+
+interval_value_expression = {
+    interval_term
+  | interval_term ~ (plus_sign | minus_sign) ~ interval_value_expression
+  | left_paren ~ datetime_value_expression ~ minus_sign ~ datetime_term ~ right_paren ~ interval_qualifier
+  }
+
+interval_value_function = {
+    interval_absolute_value_function
+  }
+
+into_argument = {
+    target_specification
+  }
+
+into_arguments = {
+    ^"INTO" ~ into_argument ~ (comma ~ into_argument)*
+  }
+
+into_descriptor = {
+    ^"INTO" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ descriptor_name
+  }
+
+introducer = {
+    underscore
+  }
+
+inverse_distribution_function = {
+    inverse_distribution_function_type ~ left_paren ~
+    inverse_distribution_function_argument ~ right_paren ~
+    within_group_specification
+  }
+
+inverse_distribution_function_argument = {
+    numeric_value_expression
+  }
+
+inverse_distribution_function_type = {
+    ^"PERCENTILE_CONT"
+  | ^"PERCENTILE_DISC"
+  }
+
+isolation_level = {
+    ^"ISOLATION" ~ ^"LEVEL" ~ level_of_isolation
+  }
+
+item_number = {
+    simple_value_specification
+  }
+
+item_number_1 = {
+    simple_value_specification
+  }
+
+item_number_2 = {
+    simple_value_specification
+  }
+
+join_column_list = {
+    column_name_list
+  }
+
+join_condition = {
+    ^"ON" ~ search_condition
+  }
+
+join_correlation_name = {
+    correlation_name
+  }
+
+join_specification = {
+    join_condition
+  | named_columns_join
+  }
+
+join_type = {
+    ^"INNER"
+  | outer_join_type ~ ( ^"OUTER" )?
+  }
+
+joined_table = {
+  (table_factor | partitioned_join_table) ~
+  (cross_join | qualified_join | natural_join)+
+  }
+
+key_word = {
+    reserved_word
+  | non_reserved_word
+  }
+
+language_clause = {
+    ^"LANGUAGE" ~ language_name
+  }
+
+language_name = {
+  ^"SQL"
+  }
+
+large_object_length = {
+    unsigned_integer ~ ( multiplier )?
+  | large_object_length_token
+  }
+
+large_object_length_token = {
+    digit+ ~ multiplier
+  }
+
+lateral_derived_table = {
+    ^"LATERAL" ~ table_subquery
+  }
+
+lead_or_lag = {
+    ^"LEAD"
+  | ^"LAG"
+  }
+
+lead_or_lag_extent = {
+    value_expression
+  }
+
+lead_or_lag_function = {
+    lead_or_lag ~ left_paren ~ lead_or_lag_extent ~
+    ( comma ~ offset ~ ( comma ~ default_expression )? )? ~ right_paren ~
+    ( null_treatment )?
+  }
+
+left_brace = {
+    "{"
+  }
+
+left_brace_minus = {
+    "{-"
+  }
+
+left_bracket = {
+    "["
+  }
+
+left_bracket_or_trigraph = {
+    left_bracket
+  | left_bracket_trigraph
+  }
+
+left_bracket_trigraph = {
+    "??("
+  }
+
+left_paren = {
+    "("
+  }
+
+length = {
+    unsigned_integer
+  }
+
+length_expression = {
+    char_length_expression
+  | octet_length_expression
+  }
+
+less_than_operator = {
+    "<"
+  }
+
+less_than_or_equals_operator = {
+    "<="
+  }
+
+level_of_isolation = {
+    ^"READ" ~ ^"UNCOMMITTED"
+  | ^"READ" ~ ^"COMMITTED"
+  | ^"REPEATABLE" ~ ^"READ"
+  | ^"SERIALIZABLE"
+  }
+
+levels_clause = {
+    ^"CASCADED"
+  | ^"LOCAL"
+  }
+
+like_clause = {
+    ^"LIKE" ~ table_name ~ ( like_options )?
+  }
+
+like_option = {
+    identity_option
+  | column_default_option
+  | generation_option
+  }
+
+like_options = {
+    like_option+
+  }
+
+like_predicate = {
+    character_like_predicate
+  | octet_like_predicate
+  }
+
+
+list_of_attributes = {
+    left_paren ~ attribute_name ~ (comma ~ attribute_name)* ~
+    right_paren
+  }
+
+
+listagg_count_indication = {
+    ^"WITH" ~ ^"COUNT"
+  | ^"WITHOUT" ~ ^"COUNT"
+  }
+
+
+listagg_overflow_clause = {
+    ^"ON" ~ ^"OVERFLOW" ~ overflow_behavior
+  }
+
+listagg_separator = {
+    character_string_literal
+  }
+
+listagg_set_function = {
+    ^"LISTAGG" ~ left_paren ~ ( set_quantifier )? ~ character_value_expression ~ comma ~
+    listagg_separator ~ ( listagg_overflow_clause )? ~ right_paren ~
+    within_group_specification
+  }
+
+listagg_truncation_filler = {
+    character_string_literal
+  }
+
+literal = {
+    signed_numeric_literal
+  | general_literal
+  }
+
+local_or_schema_qualified_name = {
+    ( local_or_schema_qualifier ~ period )? ~ qualified_identifier
+  }
+
+local_or_schema_qualifier = {
+    schema_name
+  | local_qualifier
+  }
+
+local_qualified_name = {
+    ( local_qualifier ~ period )? ~ qualified_identifier
+  }
+
+local_qualifier = {
+    ^"MODULE"
+  }
+
+locator_indication = {
+    ^"AS" ~ ^"LOCATOR"
+  }
+
+locator_reference = {
+    host_parameter_name
+  | embedded_variable_name
+  | dynamic_parameter_specification
+  }
+
+logical_offset = {
+    simple_value_specification
+  | dynamic_parameter_specification
+  }
+
+low_value = {
+    unsigned_integer
+  }
+
+major_category = {
+    ^"SQLEXCEPTION"
+  | ^"SQLWARNING"
+  | ^"NOT" ~ ^"FOUND"
+  }
+
+mantissa = {
+    exact_numeric_literal
+  }
+
+map_category = {
+    ^"MAP" ~ ^"WITH" ~ map_function_specification
+  }
+
+map_function_specification = {
+    specific_routine_designator
+  }
+
+match_number_function = {
+    ^"MATCH_NUMBER" ~ left_paren ~ right_paren
+  }
+
+match_predicate = {
+    row_value_predicand ~ match_predicate_part_2
+  }
+
+match_predicate_part_2 = {
+    ^"MATCH" ~ ( ^"UNIQUE" )? ~ ( ^"SIMPLE" | ^"PARTIAL" | ^"FULL" )? ~ table_subquery
+  }
+
+match_type = {
+    ^"FULL"
+  | ^"PARTIAL"
+  | ^"SIMPLE"
+  }
+
+max_cardinality_expression = {
+    ^"ARRAY_MAX_CARDINALITY" ~ left_paren ~ array_value_expression ~ right_paren
+  }
+
+maximum_cardinality = {
+    unsigned_integer
+  }
+
+maximum_returned_result_sets = {
+    unsigned_integer
+  }
+
+measure_name = {
+    identifier
+  }
+
+member = {
+    attribute_definition
+  }
+
+member_list = {
+    left_paren ~ member ~ (comma ~ member)* ~ right_paren
+  }
+
+member_name = {
+    member_name_alternatives ~ ( data_type_list )?
+  }
+
+member_name_alternatives = {
+    schema_qualified_routine_name
+  | method_name
+  }
+
+member_predicate = {
+    row_value_predicand ~ member_predicate_part_2
+  }
+
+member_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"MEMBER" ~ ( ^"OF" )? ~ multiset_value_expression
+  }
+
+merge_correlation_name = {
+    correlation_name
+  }
+
+merge_delete_specification = {
+    ^"DELETE"
+  }
+
+merge_insert_specification = {
+    ^"INSERT" ~ ( left_paren ~ insert_column_list ~ right_paren )? ~
+    ( override_clause )? ~ ^"VALUES" ~ merge_insert_value_list
+  }
+
+merge_insert_value_element = {
+    value_expression
+  | contextually_typed_value_specification
+  }
+
+merge_insert_value_list = {
+    left_paren ~ merge_insert_value_element ~
+    (comma ~ merge_insert_value_element)* ~ right_paren
+  }
+
+merge_operation_specification = {
+    merge_when_clause+
+  }
+
+merge_statement = {
+    ^"MERGE" ~ ^"INTO" ~ target_table ~ ( ( ^"AS" )? ~ merge_correlation_name )? ~ ^"USING" ~
+    table_reference ~ ^"ON" ~ search_condition ~ merge_operation_specification
+  }
+
+merge_update_or_delete_specification = {
+    merge_update_specification
+  | merge_delete_specification
+  }
+
+merge_update_specification = {
+    ^"UPDATE" ~ ^"SET" ~ set_clause_list
+  }
+
+merge_when_clause = {
+    merge_when_matched_clause
+  | merge_when_not_matched_clause
+  }
+
+merge_when_matched_clause = {
+    ^"WHEN" ~ ^"MATCHED" ~ ( ^"AND" ~ search_condition )? ~ ^"THEN" ~
+    merge_update_or_delete_specification
+  }
+
+merge_when_not_matched_clause = {
+    ^"WHEN" ~ ^"NOT" ~ ^"MATCHED" ~ ( ^"AND" ~ search_condition )? ~ ^"THEN" ~ merge_insert_specification
+  }
+
+method_characteristic = {
+    language_clause
+  | parameter_style_clause
+  | deterministic_characteristic
+  | SQL_data_access_indication
+  | null_call_clause
+  }
+
+method_characteristics = {
+    method_characteristic+
+  }
+
+method_invocation = {
+//    direct_invocation | ; only generalized invocation supported
+    generalized_invocation
+  }
+
+method_name = {
+    identifier
+  }
+
+method_selection = {
+    routine_invocation
+  }
+
+method_specification = {
+    original_method_specification
+  | overriding_method_specification
+  }
+
+method_specification_designator = {
+    ^"SPECIFIC" ~ ^"METHOD" ~ specific_method_name
+  | ( ^"INSTANCE" | ^"STATIC" | ^"CONSTRUCTOR" )? ~ ^"METHOD" ~ method_name ~ SQL_parameter_declaration_list ~ ( returns_clause )? ~ ^"FOR" ~ schema_resolved_user_defined_type_name
+  }
+
+method_specification_list = {
+    method_specification ~ (comma ~ method_specification)*
+  }
+
+minus_sign = {
+    "-"
+  }
+
+minutes_value = {
+    datetime_value
+  }
+
+module_authorization_clause = {
+    ^"SCHEMA" ~ schema_name
+  | ^"AUTHORIZATION" ~ module_authorization_identifier ~ ( ^"FOR" ~ ^"STATIC" ~ ( ^"ONLY" | (^"AND" ~ ^"DYNAMIC") ) )?
+  | ^"SCHEMA" ~ schema_name ~ ^"AUTHORIZATION" ~ module_authorization_identifier ~ ( ^"FOR" ~ ^"STATIC" ~ ( ^"ONLY" | (^"AND" ~ ^"DYNAMIC") ) )?
+  }
+
+module_authorization_identifier = {
+    authorization_identifier
+  }
+
+module_character_set_specification = {
+    ^"NAMES" ~ ^"ARE" ~ character_set_specification
+  }
+
+module_collation_specification = {
+    ^"COLLATION" ~ collation_name ~ ( ^"FOR" ~ character_set_specification_list )?
+  }
+
+module_collations = {
+    module_collation_specification+
+  }
+
+module_contents = {
+    declare_cursor
+  | dynamic_declare_cursor
+  | externally_invoked_procedure
+  }
+
+module_name_clause = {
+    ^"MODULE" ~ ( SQL_client_module_name )? ~ ( module_character_set_specification )?
+  }
+
+module_path_specification = {
+    path_specification
+  }
+
+module_transform_group_specification = {
+    transform_group_specification
+  }
+
+modulus_expression = {
+    ^"MOD" ~ left_paren ~ numeric_value_expression_dividend ~ comma ~
+    numeric_value_expression_divisor ~ right_paren
+  }
+
+months_value = {
+    datetime_value
+  }
+
+multiple_column_assignment = {
+    set_target_list ~ equals_operator ~ assigned_row
+  }
+
+multiple_group_specification = {
+    group_specification ~ (comma ~ group_specification)*
+  }
+
+multiplier = {
+    ^"K"
+  | ^"M"
+  | ^"G"
+  | ^"T"
+  | ^"P"
+  }
+
+multiset_element = {
+    value_expression
+  }
+
+multiset_element_list = {
+    multiset_element ~ (comma ~ multiset_element)*
+  }
+
+multiset_element_reference = {
+    ^"ELEMENT" ~ left_paren ~ multiset_value_expression ~ right_paren
+  }
+
+multiset_primary = {
+    multiset_value_function
+  | value_expression_primary
+  }
+
+multiset_set_function = {
+    ^"SET" ~ left_paren ~ multiset_value_expression ~ right_paren
+  }
+
+multiset_term = {
+    multiset_primary ~ (^"MULTISET" ~ ^"INTERSECT" ~ ( ^"ALL" | ^"DISTINCT" )? ~ multiset_term)?
+  }
+
+multiset_type = {
+    scalar_data_type ~ ^"MULTISET"
+  }
+
+multiset_value_constructor = {
+    multiset_value_constructor_by_enumeration
+  | multiset_value_constructor_by_query
+  | table_value_constructor_by_query
+  }
+
+multiset_value_constructor_by_enumeration = {
+    ^"MULTISET" ~ left_bracket_or_trigraph ~ multiset_element_list ~ right_bracket_or_trigraph
+  }
+
+multiset_value_constructor_by_query = {
+    ^"MULTISET" ~ table_subquery
+  }
+
+multiset_value_expression = {
+    multiset_term
+  | multiset_term ~ ^"MULTISET" ~ ^"UNION" ~ ( ^"ALL" | ^"DISTINCT" )? ~ multiset_value_expression
+  | multiset_term ~ ^"MULTISET" ~ ^"EXCEPT" ~ ( ^"ALL" | ^"DISTINCT" )? ~ multiset_value_expression
+  }
+
+multiset_value_function = {
+    multiset_set_function
+  }
+
+mutated_set_clause = {
+    mutated_target ~ period ~ method_name
+  }
+
+mutated_target = {
+    object_column
+//  | mutated_set_clause
+  }
+
+named_argument_SQL_argument = {
+    value_expression
+  | target_specification
+  | contextually_typed_value_specification
+  | table_argument
+  | descriptor_argument
+  }
+
+named_argument_assignment_token = {
+    "=>"
+  }
+
+named_argument_specification = {
+    SQL_parameter_name ~ named_argument_assignment_token ~
+    named_argument_SQL_argument
+  }
+
+named_columns_join = {
+    ^"USING" ~ left_paren ~ join_column_list ~ right_paren ~
+    ( ^"AS" ~ join_correlation_name )?
+  }
+
+national_character_large_object_type = {
+    ^"NATIONAL" ~ ^"CHARACTER" ~ ^"LARGE" ~ ^"OBJECT" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  | ^"NCHAR" ~ ^"LARGE" ~ ^"OBJECT" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  | ^"NCLOB" ~ ( left_paren ~ character_large_object_length ~ right_paren )?
+  }
+
+national_character_string_literal = @{
+    ^"N" ~ quote ~ ( character_representation )* ~ quote ~
+    (separator ~ quote ~ ( character_representation )* ~ quote)*
+  }
+
+national_character_string_type = {
+    ^"NATIONAL" ~ ^"CHARACTER" ~ ( left_paren ~ character_length ~ right_paren )?
+  | ^"NATIONAL" ~ ^"CHAR" ~ ( left_paren ~ character_length ~ right_paren )?
+  | ^"NCHAR" ~ ( left_paren ~ character_length ~ right_paren )?
+  | ^"NATIONAL" ~ ^"CHARACTER" ~ ^"VARYING" ~ left_paren ~ character_length ~ right_paren
+  | ^"NATIONAL" ~ ^"CHAR" ~ ^"VARYING" ~ left_paren ~ character_length ~ right_paren
+  | ^"NCHAR" ~ ^"VARYING" ~ left_paren ~ character_length ~ right_paren
+  | national_character_large_object_type
+  }
+
+natural_join = {
+    ^"NATURAL" ~ ( join_type )? ~ ^"JOIN" ~
+  ( table_reference | partitioned_join_table )
+  }
+
+natural_logarithm = {
+    ^"LN" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+nested_row_number_function = {
+    ^"ROW_NUMBER" ~ left_paren ~ row_marker ~ right_paren
+  }
+
+nested_window_function = {
+    nested_row_number_function
+  | value_of_expression_at_row
+  }
+
+nesting_option = {
+    ^"WITH" ~ ^"NESTING"
+  | ^"WITHOUT" ~ ^"NESTING"
+  }
+
+new_invocation = {
+    method_invocation
+  | routine_invocation
+  }
+
+new_specification = {
+    ^"NEW" ~ path_resolved_user_defined_type_name ~ SQL_argument_list
+  }
+
+new_transition_table_name = {
+    transition_table_name
+  }
+
+new_transition_variable_name = {
+    correlation_name
+  }
+
+new_window_name = {
+    window_name
+  }
+
+newline = {
+    NEWLINE
+  }
+
+next_value_expression = {
+    ^"NEXT" ~ ^"VALUE" ~ ^"FOR" ~ sequence_generator_name
+  }
+
+non_cycle_mark_value = {
+    value_expression
+  }
+
+non_escaped_character = {
+    !(left_bracket
+    | right_bracket
+    | left_paren
+    | right_paren
+    | vertical_bar
+    | circumflex
+    | minus_sign
+    | plus_sign
+    | asterisk
+    | underscore
+    | percent
+    | question_mark
+    | left_brace) ~ similar_pattern
+  }
+
+non_extended_descriptor_name = {
+    identifier
+  }
+
+non_reserved_word = {
+    ^"A"
+  | ^"ABSOLUTE"
+  | ^"ACTION"
+  | ^"ADD"
+  | ^"ADMIN"
+  | ^"AFTER"
+  | ^"ALWAYS"
+  | ^"ASC"
+  | ^"ASSERTION"
+  | ^"ASSIGNMENT"
+  | ^"ATTRIBUTE"
+  | ^"ATTRIBUTES"
+  | ^"BEFORE"
+  | ^"BERNOULLI"
+  | ^"BREADTH"
+  | ^"C"
+  | ^"CASCADE"
+  | ^"CATALOG"
+  | ^"CATALOG_NAME"
+  | ^"CHAIN"
+  | ^"CHAINING"
+  | ^"CHARACTER_SET_CATALOG"
+  | ^"CHARACTER_SET_NAME"
+  | ^"CHARACTER_SET_SCHEMA"
+  | ^"CHARACTERISTICS"
+  | ^"CHARACTERS"
+  | ^"CLASS_ORIGIN"
+  | ^"COLLATION"
+  | ^"COLLATION_CATALOG"
+  | ^"COLLATION_NAME"
+  | ^"COLLATION_SCHEMA"
+  | ^"COLUMNS"
+  | ^"COLUMN_NAME"
+  | ^"COMMAND_FUNCTION"
+  | ^"COMMAND_FUNCTION_CODE"
+  | ^"COMMITTED"
+  | ^"CONDITIONAL"
+  | ^"CONDITION_NUMBER"
+  | ^"CONNECTION"
+  | ^"CONNECTION_NAME"
+  | ^"CONSTRAINT_CATALOG"
+  | ^"CONSTRAINT_NAME"
+  | ^"CONSTRAINT_SCHEMA"
+  | ^"CONSTRAINTS"
+  | ^"CONSTRUCTOR"
+  | ^"CONTINUE"
+  | ^"CURSOR_NAME"
+  | ^"DATA"
+  | ^"DATETIME_INTERVAL_CODE"
+  | ^"DATETIME_INTERVAL_PRECISION"
+  | ^"DEFAULTS"
+  | ^"DEFERRABLE"
+  | ^"DEFERRED"
+  | ^"DEFINED"
+  | ^"DEFINER"
+  | ^"DEGREE"
+  | ^"DEPTH"
+  | ^"DERIVED"
+  | ^"DESC"
+  | ^"DESCRIBE_CATALOG"
+  | ^"DESCRIBE_NAME"
+  | ^"DESCRIBE_PROCEDURE_SPECIFIC_CATALOG"
+  | ^"DESCRIBE_PROCEDURE_SPECIFIC_NAME"
+  | ^"DESCRIBE_PROCEDURE_SPECIFIC_SCHEMA"
+  | ^"DESCRIBE_SCHEMA"
+  | ^"DESCRIPTOR"
+  | ^"DIAGNOSTICS"
+  | ^"DISPATCH"
+  | ^"DOMAIN"
+  | ^"DYNAMIC_FUNCTION"
+  | ^"DYNAMIC_FUNCTION_CODE"
+  | ^"ENCODING"
+  | ^"ENFORCED"
+  | ^"ERROR"
+  | ^"EXCLUDE"
+  | ^"EXCLUDING"
+  | ^"EXPRESSION"
+  | ^"FINAL"
+  | ^"FINISH"
+  | ^"FINISH_CATALOG"
+  | ^"FINISH_NAME"
+  | ^"FINISH_PROCEDURE_SPECIFIC_CATALOG"
+  | ^"FINISH_PROCEDURE_SPECIFIC_NAME"
+  | ^"FINISH_PROCEDURE_SPECIFIC_SCHEMA"
+  | ^"FINISH_SCHEMA"
+  | ^"FIRST"
+  | ^"FLAG"
+  | ^"FOLLOWING"
+  | ^"FORMAT"
+  | ^"FOUND"
+  | ^"FULFILL"
+  | ^"FULFILL_CATALOG"
+  | ^"FULFILL_NAME"
+  | ^"FULFILL_PROCEDURE_SPECIFIC_CATALOG"
+  | ^"FULFILL_PROCEDURE_SPECIFIC_NAME"
+  | ^"FULFILL_PROCEDURE_SPECIFIC_SCHEMA"
+  | ^"FULFILL_SCHEMA"
+  | ^"G"
+  | ^"GENERAL"
+  | ^"GENERATED"
+  | ^"GO"
+  | ^"GOTO"
+  | ^"GRANTED"
+  | ^"HAS_PASS_THROUGH_COLUMNS"
+  | ^"HAS_PASS_THRU_COLS"
+  | ^"HIERARCHY"
+  | ^"IGNORE"
+  | ^"IMMEDIATE"
+  | ^"IMMEDIATELY"
+  | ^"IMPLEMENTATION"
+  | ^"INCLUDING"
+  | ^"INCREMENT"
+  | ^"INITIALLY"
+  | ^"INPUT"
+  | ^"INSTANCE"
+  | ^"INSTANTIABLE"
+  | ^"INSTEAD"
+  | ^"INVOKER"
+  | ^"ISOLATION"
+  | ^"IS_PRUNABLE"
+  | ^"JSON"
+  | ^"K"
+  | ^"KEEP"
+  | ^"KEY"
+  | ^"KEYS"
+  | ^"KEY_MEMBER"
+  | ^"KEY_TYPE"
+  | ^"LAST"
+  | ^"LENGTH"
+  | ^"LEVEL"
+  | ^"LOCATOR"
+  | ^"M"
+  | ^"MAP"
+  | ^"MATCHED"
+  | ^"MAXVALUE"
+  | ^"MESSAGE_LENGTH"
+  | ^"MESSAGE_OCTET_LENGTH"
+  | ^"MESSAGE_TEXT"
+  | ^"MINVALUE"
+  | ^"MORE"
+  | ^"NAME"
+  | ^"NAMES"
+  | ^"NESTED"
+  | ^"NESTING"
+  | ^"NEXT"
+  | ^"NFC"
+  | ^"NFD"
+  | ^"NFKC"
+  | ^"NFKD"
+  | ^"NORMALIZED"
+  | ^"NULLABLE"
+  | ^"NULLS"
+  | ^"NUMBER"
+  | ^"OBJECT"
+  | ^"OCTETS"
+  | ^"OPTION"
+  | ^"OPTIONS"
+  | ^"ORDERING"
+  | ^"ORDINALITY"
+  | ^"OTHERS"
+  | ^"OUTPUT"
+  | ^"OVERFLOW"
+  | ^"OVERRIDING"
+  | ^"P"
+  | ^"PAD"
+  | ^"PARAMETER_MODE"
+  | ^"PARAMETER_NAME"
+  | ^"PARAMETER_ORDINAL_POSITION"
+  | ^"PARAMETER_SPECIFIC_CATALOG"
+  | ^"PARAMETER_SPECIFIC_NAME"
+  | ^"PARAMETER_SPECIFIC_SCHEMA"
+  | ^"PARTIAL"
+  | ^"PASS"
+  | ^"PASSING"
+  | ^"PAST"
+  | ^"PATH"
+  | ^"PLACING"
+  | ^"PLAN"
+  | ^"PRECEDING"
+  | ^"PRESERVE"
+  | ^"PRIOR"
+  | ^"PRIVATE"
+  | ^"PRIVATE_PARAMETERS"
+  | ^"PRIVATE_PARAMS_S"
+  | ^"PRIVILEGES"
+  | ^"PRUNE"
+  | ^"PUBLIC"
+  | ^"QUOTES"
+  | ^"READ"
+  | ^"RELATIVE"
+  | ^"REPEATABLE"
+  | ^"RESPECT"
+  | ^"RESTART"
+  | ^"RESTRICT"
+  | ^"RETURNED_CARDINALITY"
+  | ^"RETURNED_LENGTH"
+  | ^"RETURNED_OCTET_LENGTH"
+  | ^"RETURNED_SQLSTATE"
+  | ^"RETURNING"
+  | ^"RETURNS_ONLY_PASS_THROUGH"
+  | ^"RET_ONLY_PASS_THRU"
+  | ^"ROLE"
+  | ^"ROUTINE"
+  | ^"ROUTINE_CATALOG"
+  | ^"ROUTINE_NAME"
+  | ^"ROUTINE_SCHEMA"
+  | ^"ROW_COUNT"
+  | ^"SCALAR"
+  | ^"SCALE"
+  | ^"SCHEMA"
+  | ^"SCHEMA_NAME"
+  | ^"SCOPE_CATALOG"
+  | ^"SCOPE_NAME"
+  | ^"SCOPE_SCHEMA"
+  | ^"SECTION"
+  | ^"SECURITY"
+  | ^"SELF"
+  | ^"SEQUENCE"
+  | ^"SERIALIZABLE"
+  | ^"SERVER_NAME"
+  | ^"SESSION"
+  | ^"SETS"
+  | ^"SIMPLE"
+  | ^"SIZE"
+  | ^"SOURCE"
+  | ^"SPACE"
+  | ^"SPECIFIC_NAME"
+  | ^"START_CATALOG"
+  | ^"START_NAME"
+  | ^"START_PROCEDURE_SPECIFIC_CATALOG"
+  | ^"START_PROCEDURE_SPECIFIC_NAME"
+  | ^"START_PROCEDURE_SPECIFIC_SCHEMA"
+  | ^"START_SCHEMA"
+  | ^"STATE"
+  | ^"STATEMENT"
+  | ^"STRING"
+  | ^"STRUCTURE"
+  | ^"STYLE"
+  | ^"SUBCLASS_ORIGIN"
+  | ^"T"
+  | ^"TABLE_NAME"
+  | ^"TABLE_SEMANTICS"
+  | ^"TEMPORARY"
+  | ^"THROUGH"
+  | ^"TIES"
+  | ^"TOP_LEVEL_COUNT"
+  | ^"TRANSACTION"
+  | ^"TRANSACTION_ACTIVE"
+  | ^"TRANSACTIONS_COMMITTED"
+  | ^"TRANSACTIONS_ROLLED_BACK"
+  | ^"TRANSFORM"
+  | ^"TRANSFORMS"
+  | ^"TRIGGER_CATALOG"
+  | ^"TRIGGER_NAME"
+  | ^"TRIGGER_SCHEMA"
+  | ^"TYPE"
+  | ^"UNBOUNDED"
+  | ^"UNCOMMITTED"
+  | ^"UNCONDITIONAL"
+  | ^"UNDER"
+  | ^"UNNAMED"
+  | ^"USAGE"
+  | ^"USER_DEFINED_TYPE_CATALOG"
+  | ^"USER_DEFINED_TYPE_CODE"
+  | ^"USER_DEFINED_TYPE_NAME"
+  | ^"USER_DEFINED_TYPE_SCHEMA"
+  | ^"UTF16"
+  | ^"UTF32"
+  | ^"UTF8"
+  | ^"VIEW"
+  | ^"WORK"
+  | ^"WRAPPER"
+  | ^"WRITE"
+  | ^"ZONE"
+  }
+
+non_second_primary_datetime_field = {
+    ^"YEAR"
+  | ^"MONTH"
+  | ^"DAY"
+  | ^"HOUR"
+  | ^"MINUTE"
+  }
+
+nondelimiter_token = {
+    regular_identifier
+  | key_word
+  | unsigned_numeric_literal
+  | national_character_string_literal
+  | binary_string_literal
+  | large_object_length_token
+  | Unicode_delimited_identifier
+  | Unicode_character_string_literal
+  | SQL_language_identifier
+  }
+
+nondoublequote_character = {
+    !double_quote ~ ANY
+  }
+
+nonparenthesized_value_expression_primary = {
+    unsigned_value_specification
+  | column_reference
+  | set_function_specification
+  | window_function
+  | nested_window_function
+  | scalar_subquery
+  | case_expression
+  | cast_specification
+  | field_reference
+  | subtype_treatment
+  | method_invocation
+  | static_method_invocation
+  | new_specification
+  | reference_resolution
+  | collection_value_constructor
+  | array_element_reference
+  | multiset_element_reference
+  | next_value_expression
+  | routine_invocation
+  | row_pattern_navigation_operation
+  | JSON_value_function
+  }
+
+nonquote_character = {
+    !quote ~ ANY
+  }
+
+normal_form = {
+    ^"NFC"
+  | ^"NFD"
+  | ^"NFKC"
+  | ^"NFKD"
+  }
+
+normalize_function = {
+    ^"NORMALIZE" ~ left_paren ~ character_value_expression ~
+    ( comma ~ normal_form ~ ( comma ~ normalize_function_result_length )? )? ~
+    right_paren
+  }
+
+normalize_function_result_length = {
+    character_length
+  | character_large_object_length
+  }
+
+normalized_predicate = {
+    row_value_predicand ~ normalized_predicate_part_2
+  }
+
+normalized_predicate_part_2 = {
+    ^"IS" ~ ( ^"NOT" )? ~ ( normal_form )? ~ ^"NORMALIZED"
+  }
+
+not_equals_operator = {
+    "<>"
+  }
+
+nth_row = {
+    simple_value_specification
+  | dynamic_parameter_specification
+  }
+
+nth_value_function = {
+    ^"NTH_VALUE" ~ left_paren ~ value_expression ~ comma ~ nth_row ~ right_paren ~
+    ( from_first_or_last )? ~ ( null_treatment )?
+  }
+
+ntile_function = {
+    ^"NTILE" ~ left_paren ~ number_of_tiles ~ right_paren
+  }
+
+null_ordering = {
+    ^"NULLS" ~ ^"FIRST"
+  | ^"NULLS" ~ ^"LAST"
+  }
+
+null_predicate = {
+    row_value_predicand ~ null_predicate_part_2
+  }
+
+null_predicate_part_2 = {
+    ^"IS" ~ ( ^"NOT" )? ~ ^"NULL"
+  }
+
+null_specification = {
+    ^"NULL"
+  }
+
+null_treatment = {
+    ^"RESPECT" ~ ^"NULLS"
+  | ^"IGNORE" ~ ^"NULLS"
+  }
+
+null_call_clause = {
+    ^"RETURNS" ~ ^"NULL" ~ ^"ON" ~ ^"NULL" ~ ^"INPUT"
+  | ^"CALLED" ~ ^"ON" ~ ^"NULL" ~ ^"INPUT"
+  }
+
+number_of_conditions = {
+    simple_value_specification
+  }
+
+number_of_tiles = {
+    simple_value_specification
+  | dynamic_parameter_specification
+  }
+
+numeric_primary = {
+    value_expression_primary
+  | numeric_value_function
+  }
+
+numeric_type = {
+    exact_numeric_type
+  | approximate_numeric_type
+  | decimal_floating_point_type
+  }
+
+numeric_value_expression = {
+    term ~ ( (plus_sign | minus_sign) ~ numeric_value_expression )?
+  }
+
+numeric_value_expression_base = {
+    numeric_value_expression
+  }
+
+numeric_value_expression_dividend = {
+    numeric_value_expression
+  }
+
+numeric_value_expression_divisor = {
+    numeric_value_expression
+  }
+
+numeric_value_expression_exponent = {
+    numeric_value_expression
+  }
+
+numeric_value_function = {
+    position_expression
+  | regex_occurrences_function
+  | regex_position_expression
+  | extract_expression
+  | length_expression
+  | cardinality_expression
+  | max_cardinality_expression
+  | absolute_value_expression
+  | modulus_expression
+  | trigonometric_function
+  | general_logarithm_function
+  | common_logarithm
+  | natural_logarithm
+  | exponential_function
+  | power_function
+  | square_root
+  | floor_function
+  | ceiling_function
+  | width_bucket_function
+  | match_number_function
+  }
+
+object_column = {
+    column_name
+  }
+
+object_name = {
+    ( ^"TABLE" )? ~ table_name
+  | ^"DOMAIN" ~ domain_name
+  | ^"COLLATION" ~ collation_name
+  | ^"CHARACTER" ~ ^"SET" ~ character_set_name
+  | ^"TRANSLATION" ~ transliteration_name
+  | ^"TYPE" ~ schema_resolved_user_defined_type_name
+  | ^"SEQUENCE" ~ sequence_generator_name
+  | specific_routine_designator
+  }
+
+object_privileges = {
+    ^"ALL" ~ ^"PRIVILEGES"
+  | action ~ (comma ~ action)*
+  }
+
+occurrences = {
+    simple_value_specification
+  }
+
+octet_length_expression = {
+    ^"OCTET_LENGTH" ~ left_paren ~ string_value_expression ~ right_paren
+  }
+
+octet_like_predicate = {
+    row_value_predicand ~ octet_like_predicate_part_2
+  }
+
+octet_like_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"LIKE" ~ octet_pattern ~ ( ^"ESCAPE" ~ escape_octet )?
+  }
+
+octet_pattern = {
+    binary_value_expression
+  }
+
+offset = {
+    exact_numeric_literal
+  }
+
+offset_row_count = {
+    simple_value_specification
+  }
+
+old_transition_table_name = {
+    transition_table_name
+  }
+
+old_transition_variable_name = {
+    correlation_name
+  }
+
+only_spec = {
+    ^"ONLY" ~ left_paren ~ table_or_query_name ~ right_paren
+  }
+
+open_statement = {
+    ^"OPEN" ~ cursor_name
+  }
+
+order_by_clause = {
+    ^"ORDER" ~ ^"BY" ~ sort_specification_list
+  }
+
+ordered_set_function = {
+    hypothetical_set_function
+  | inverse_distribution_function
+  | listagg_set_function
+  }
+
+ordering_category = {
+    relative_category
+  | map_category
+  | state_category
+  }
+
+ordering_form = {
+    equals_ordering_form
+  | full_ordering_form
+  }
+
+ordering_specification = {
+    ^"ASC"
+  | ^"DESC"
+  }
+
+ordinary_grouping_set = {
+    grouping_column_reference
+  | left_paren ~ grouping_column_reference_list ~ right_paren
+  }
+
+ordinary_grouping_set_list = {
+    ordinary_grouping_set ~ (comma ~ ordinary_grouping_set)*
+  }
+
+original_method_specification = {
+    partial_method_specification ~ ( ^"SELF" ~ ^"AS" ~ ^"RESULT" )? ~ ( ^"SELF" ~ ^"AS" ~ ^"LOCATOR" )? ~
+    ( method_characteristics )?
+  }
+
+outer_join_type = {
+    ^"LEFT"
+  | ^"RIGHT"
+  | ^"FULL"
+  }
+
+output_using_clause = {
+    into_arguments
+  | into_descriptor
+  }
+
+overflow_behavior = {
+    ^"ERROR"
+  | ^"TRUNCATE" ~ ( listagg_truncation_filler )? ~ listagg_count_indication
+  }
+
+overlaps_predicate = {
+    overlaps_predicate_part_1 ~ overlaps_predicate_part_2
+  }
+
+overlaps_predicate_part_1 = {
+    row_value_predicand_1
+  }
+
+overlaps_predicate_part_2 = {
+    ^"OVERLAPS" ~ row_value_predicand_2
+  }
+
+override_clause = {
+    ^"OVERRIDING" ~ ^"USER" ~ ^"VALUE"
+  | ^"OVERRIDING" ~ ^"SYSTEM" ~ ^"VALUE"
+  }
+
+overriding_method_specification = {
+    ^"OVERRIDING" ~ partial_method_specification
+  }
+
+pad_characteristic = {
+    ^"NO" ~ ^"PAD"
+  | ^"PAD" ~ ^"SPACE"
+  }
+
+parameter_default = {
+    value_expression
+  | contextually_typed_value_specification
+  | descriptor_value_constructor
+  }
+
+parameter_mode = {
+    ^"IN"
+  | ^"OUT"
+  | ^"INOUT"
+  }
+
+parameter_style = {
+    ^"SQL"
+  | ^"GENERAL"
+  }
+
+parameter_style_clause = {
+    ^"PARAMETER" ~ ^"STYLE" ~ parameter_style
+  }
+
+parameter_type = {
+    data_type ~ ( locator_indication )?
+  | generic_table_parameter_type
+  | descriptor_parameter_type
+  }
+
+parameter_using_clause = {
+    input_using_clause
+  }
+
+parenthesized_boolean_value_expression = {
+    left_paren ~ boolean_value_expression ~ right_paren
+  }
+
+parenthesized_derived_column_list = {
+    left_paren ~ derived_column_list ~ right_paren
+  }
+
+parenthesized_joined_table = {
+    left_paren ~ parenthesized_joined_table ~ right_paren
+  | left_paren ~ joined_table ~ right_paren
+  }
+
+parenthesized_value_expression = {
+    left_paren ~ value_expression ~ right_paren
+  }
+
+partial_method_specification = {
+    ( ^"INSTANCE" | ^"STATIC" | ^"CONSTRUCTOR" )? ~ ^"METHOD" ~ method_name ~
+    SQL_parameter_declaration_list ~ returns_clause ~
+    ( ^"SPECIFIC" ~ specific_method_name )?
+  }
+
+partitioned_join_column_reference = {
+    column_reference
+  }
+
+partitioned_join_column_reference_list = {
+    left_paren ~ partitioned_join_column_reference ~
+    (comma ~ partitioned_join_column_reference)* ~ right_paren
+  }
+
+partitioned_join_table = {
+    table_factor ~ ^"PARTITION" ~ ^"BY" ~ partitioned_join_column_reference_list
+  }
+
+pass_through_option = {
+    ^"PASS" ~ ^"THROUGH"
+  | ^"NO" ~ ^"PASS" ~ ^"THROUGH"
+  }
+
+path_column = {
+    column_name
+  }
+
+path_specification = {
+    ^"PATH" ~ schema_name_list
+  }
+
+path_resolved_user_defined_type_name = {
+    user_defined_type_name
+  }
+
+percent = {
+    "%"
+  }
+
+period = {
+    "."
+  }
+
+period_begin_column_name = {
+    column_name
+  }
+
+period_contains_predicate = {
+    period_predicand_1 ~ period_contains_predicate_part_2
+  }
+
+period_contains_predicate_part_2 = {
+    ^"CONTAINS" ~ period_or_point_in_time_predicand
+  }
+
+period_end_column_name = {
+    column_name
+  }
+
+period_end_value = {
+    datetime_value_expression
+  }
+
+period_equals_predicate = {
+    period_predicand_1 ~ period_equals_predicate_part_2
+  }
+
+period_equals_predicate_part_2 = {
+    ^"EQUALS" ~ period_predicand_2
+  }
+
+period_immediately_precedes_predicate = {
+    period_predicand_1 ~ period_immediately_precedes_predicate_part_2
+  }
+
+period_immediately_precedes_predicate_part_2 = {
+    ^"IMMEDIATELY" ~ ^"PRECEDES" ~ period_predicand_2
+  }
+
+period_immediately_succeeds_predicate = {
+    period_predicand_1 ~ period_immediately_succeeds_predicate_part_2
+  }
+
+period_immediately_succeeds_predicate_part_2 = {
+    ^"IMMEDIATELY" ~ ^"SUCCEEDS" ~ period_predicand_2
+  }
+
+period_or_point_in_time_predicand = {
+    period_predicand
+  | datetime_value_expression
+  }
+
+period_overlaps_predicate = {
+    period_predicand_1 ~ period_overlaps_predicate_part_2
+  }
+
+period_overlaps_predicate_part_2 = {
+    ^"OVERLAPS" ~ period_predicand_2
+  }
+
+period_precedes_predicate = {
+    period_predicand_1 ~ period_precedes_predicate_part_2
+  }
+
+period_precedes_predicate_part_2 = {
+    ^"PRECEDES" ~ period_predicand_2
+  }
+
+period_predicand = {
+    period_reference
+  | ^"PERIOD" ~ left_paren ~ period_start_value ~ comma ~ period_end_value ~ right_paren
+  }
+
+period_predicand_1 = {
+    period_predicand
+  }
+
+period_predicand_2 = {
+    period_predicand
+  }
+
+period_predicate = {
+    period_overlaps_predicate
+  | period_equals_predicate
+  | period_contains_predicate
+  | period_precedes_predicate
+  | period_succeeds_predicate
+  | period_immediately_precedes_predicate
+  | period_immediately_succeeds_predicate
+  }
+
+period_reference = {
+    basic_identifier_chain
+  }
+
+period_start_value = {
+    datetime_value_expression
+  }
+
+period_succeeds_predicate = {
+    period_predicand_1 ~ period_succeeds_predicate_part_2
+  }
+
+period_succeeds_predicate_part_2 = {
+    ^"SUCCEEDS" ~ period_predicand_2
+  }
+
+physical_offset = {
+    simple_value_specification
+  | dynamic_parameter_specification
+  }
+
+pipe_row_statement = {
+    ^"PIPE" ~ ^"ROW" ~ PTF_descriptor_name
+  }
+
+plus_sign = {
+    "+"
+  }
+
+point_in_time = {
+    datetime_value_expression
+  }
+
+point_in_time_1 = {
+    point_in_time
+  }
+
+point_in_time_2 = {
+    point_in_time
+  }
+
+polymorphic_table_function_body = {
+    ( PTF_private_parameters )? ~
+    ( ^"DESCRIBE" ~ ^"WITH" ~ PTF_describe_component_procedure )? ~
+    ( ^"START" ~ ^"WITH" ~ PTF_start_component_procedure )? ~ ^"FULFILL" ~ ^"WITH" ~
+    PTF_fulfill_component_procedure ~
+    ( ^"FINISH" ~ ^"WITH" ~ PTF_finish_component_procedure )?
+  }
+
+position_expression = {
+    character_position_expression
+  | binary_position_expression
+  }
+
+power_function = {
+    ^"POWER" ~ left_paren ~ numeric_value_expression_base ~ comma ~
+    numeric_value_expression_exponent ~ right_paren
+  }
+
+precision = {
+    unsigned_integer
+  }
+
+predefined_type = {
+    character_string_type ~ ( ^"CHARACTER" ~ ^"SET" ~ character_set_specification )? ~
+    ( collate_clause )?
+  | national_character_string_type ~ ( collate_clause )?
+  | binary_string_type
+  | numeric_type
+  | boolean_type
+  | datetime_type
+  | interval_type
+  }
+
+predicate = {
+    comparison_predicate
+  | between_predicate
+  | in_predicate
+  | like_predicate
+  | similar_predicate
+  | regex_like_predicate
+  | null_predicate
+  | quantified_comparison_predicate
+  | exists_predicate
+  | unique_predicate
+  | normalized_predicate
+  | match_predicate
+  | overlaps_predicate
+  | distinct_predicate
+  | member_predicate
+  | submultiset_predicate
+  | set_predicate
+  | type_predicate
+  | period_predicate
+  | JSON_predicate
+  | JSON_exists_predicate
+  }
+
+preparable_SQL_control_statement = {
+    SQL_control_statement
+  }
+
+preparable_SQL_data_statement = {
+    delete_statement_searched
+  | dynamic_single_row_select_statement
+  | insert_statement
+  | dynamic_select_statement
+  | update_statement_searched
+  | truncate_table_statement
+  | merge_statement
+  | preparable_dynamic_delete_statement_positioned
+  | preparable_dynamic_update_statement_positioned
+  | hold_locator_statement
+  | free_locator_statement
+  }
+
+preparable_SQL_schema_statement = {
+    SQL_schema_statement
+  }
+
+preparable_SQL_session_statement = {
+    SQL_session_statement
+  }
+
+preparable_SQL_transaction_statement = {
+    SQL_transaction_statement
+  }
+
+preparable_dynamic_cursor_name = {
+    ( scope_option )? ~ cursor_name
+  }
+
+preparable_dynamic_delete_statement_positioned = {
+    ^"DELETE" ~ ( ^"FROM" ~ target_table )? ~ ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~
+    preparable_dynamic_cursor_name
+  }
+
+preparable_dynamic_update_statement_positioned = {
+    ^"UPDATE" ~ ( target_table )? ~ ^"SET" ~ set_clause_list ~ ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~
+    preparable_dynamic_cursor_name
+  }
+
+preparable_statement = {
+    preparable_SQL_data_statement
+  | preparable_SQL_schema_statement
+  | preparable_SQL_transaction_statement
+  | preparable_SQL_control_statement
+  | preparable_SQL_session_statement
+  }
+
+prepare_statement = {
+    ^"PREPARE" ~ SQL_statement_name ~ ( attributes_specification )? ~ ^"FROM" ~
+    SQL_statement_variable
+  }
+
+prev_or_next = {
+    ^"PREV"
+  | ^"NEXT"
+  }
+
+primary_datetime_field = {
+    non_second_primary_datetime_field
+  | ^"SECOND"
+  }
+
+private_parameter_declaration_list = {
+    left_paren ~
+    ( SQL_parameter_declaration ~ (comma ~ SQL_parameter_declaration)* )? ~
+    right_paren
+  }
+
+privilege_column_list = {
+    column_name_list
+  }
+
+privilege_method_list = {
+    specific_routine_designator ~ (comma ~ specific_routine_designator)*
+  }
+
+privileges = {
+    object_privileges ~ ^"ON" ~ object_name
+  }
+
+procedure_name = {
+    identifier
+  }
+
+qualified_asterisk = {
+    asterisked_identifier_chain ~ period ~ asterisk
+  | all_fields_reference
+  }
+
+qualified_identifier = {
+    identifier
+  }
+
+qualified_join = {
+    ( join_type )? ~ ^"JOIN" ~
+    ( table_reference | partitioned_join_table ) ~ join_specification
+  }
+
+quantified_comparison_predicate = {
+    row_value_predicand ~ quantified_comparison_predicate_part_2
+  }
+
+quantified_comparison_predicate_part_2 = {
+    comp_op ~ quantifier ~ table_subquery
+  }
+
+quantifier = {
+    all
+  | some
+  }
+
+query_expression = {
+    ( with_clause )? ~ query_expression_body ~ ( order_by_clause )? ~
+    ( result_offset_clause )? ~ ( fetch_first_clause )?
+  }
+
+query_expression_body = {
+    query_term ~ ( (^"UNION" | ^"EXCEPT" ) ~ ( ^"ALL" | ^"DISTINCT" )? ~ ( corresponding_spec )? ~ query_expression_body )*
+  }
+
+query_name = {
+    identifier
+  }
+
+query_primary = {
+    simple_table
+  | left_paren ~ query_expression_body ~ ( order_by_clause )? ~ ( result_offset_clause )? ~ ( fetch_first_clause )? ~ right_paren
+  }
+
+query_specification = {
+    ^"SELECT" ~ (set_quantifier)? ~ select_list ~ table_expression
+  }
+
+query_system_time_period_specification = {
+    ^"FOR" ~ ^"SYSTEM_TIME" ~ ^"AS" ~ ^"OF" ~ point_in_time_1
+  | ^"FOR" ~ ^"SYSTEM_TIME" ~ ^"BETWEEN" ~ ( ^"ASYMMETRIC" | ^"SYMMETRIC" )? ~ point_in_time_1 ~ ^"AND" ~ point_in_time_2
+  | ^"FOR" ~ ^"SYSTEM_TIME" ~ ^"FROM" ~ point_in_time_1 ~ ^"TO" ~ point_in_time_2
+  }
+
+query_term = {
+    query_primary ~ ( ^"INTERSECT" ~ ( ^"ALL" | ^"DISTINCT" )? ~ ( corresponding_spec )? ~ query_term )?
+  }
+
+question_mark = {
+    "?"
+  }
+
+quote = {
+    "'"
+  }
+
+quote_symbol = {
+    quote ~ quote
+  }
+
+range_variable = {
+    table_name
+  | query_name
+  | correlation_name
+  }
+
+rank_function_type = {
+    ^"RANK"
+  | ^"DENSE_RANK"
+  | ^"PERCENT_RANK"
+  | ^"CUME_DIST"
+  }
+
+recursive_search_order = {
+    ^"DEPTH" ~ ^"FIRST" ~ ^"BY" ~ column_name_list
+  | ^"BREADTH" ~ ^"FIRST" ~ ^"BY" ~ column_name_list
+  }
+
+reference_generation = {
+    ^"SYSTEM" ~ ^"GENERATED"
+  | ^"USER" ~ ^"GENERATED"
+  | ^"DERIVED"
+  }
+
+reference_resolution = {
+    ^"DEREF" ~ left_paren ~ reference_value_expression ~ right_paren
+  }
+
+reference_type = {
+    ^"REF" ~ left_paren ~ referenced_type ~ right_paren ~ ( scope_clause )?
+  }
+
+reference_type_specification = {
+    user_defined_representation
+  | derived_representation
+  | system_generated_representation
+  }
+
+reference_value_expression = {
+    value_expression_primary
+  }
+
+referenceable_view_specification = {
+    ^"OF" ~ path_resolved_user_defined_type_name ~ ( subview_clause )? ~
+    ( view_element_list )?
+  }
+
+referenced_column_list = {
+    column_name_list
+  }
+
+referenced_period_specification = {
+    ^"PERIOD" ~ application_time_period_name
+  }
+
+referenced_table_and_columns = {
+    table_name ~
+    ( left_paren ~ referenced_column_list ~ ( comma ~ referenced_period_specification )? ~ right_paren )?
+  }
+
+referenced_type = {
+    path_resolved_user_defined_type_name
+  }
+
+references_specification = {
+    ^"REFERENCES" ~ referenced_table_and_columns ~ ( ^"MATCH" ~ match_type )? ~
+    ( referential_triggered_action )?
+  }
+
+referencing_column_list = {
+    column_name_list
+  }
+
+referencing_period_specification = {
+    ^"PERIOD" ~ application_time_period_name
+  }
+
+referential_action = {
+    ^"CASCADE"
+  | ^"SET" ~ ^"NULL"
+  | ^"SET" ~ ^"DEFAULT"
+  | ^"RESTRICT"
+  | ^"NO" ~ ^"ACTION"
+  }
+
+referential_constraint_definition = {
+    ^"FOREIGN" ~ ^"KEY" ~ left_paren ~ referencing_column_list ~
+    ( comma ~ referencing_period_specification )? ~ right_paren ~
+    references_specification
+  }
+
+referential_triggered_action = {
+    update_rule ~ ( delete_rule )?
+  | delete_rule ~ ( update_rule )?
+  }
+
+regex_capture_group = {
+    numeric_value_expression
+  }
+
+regex_like_predicate = {
+    row_value_predicand ~ regex_like_predicate_part_2
+  }
+
+regex_like_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"LIKE_REGEX" ~ XQuery_pattern ~ ( ^"FLAG" ~ XQuery_option_flag )?
+  }
+
+regex_occurrence = {
+    numeric_value_expression
+  }
+
+regex_occurrences_function = {
+    ^"OCCURRENCES_REGEX" ~ left_paren ~ XQuery_pattern ~ ( ^"FLAG" ~ XQuery_option_flag )? ~
+    ^"IN" ~ regex_subject_string ~ ( ^"FROM" ~ start_position )? ~
+    ( ^"USING" ~ char_length_units )? ~ right_paren
+  }
+
+regex_position_expression = {
+    ^"POSITION_REGEX" ~ left_paren ~ ( regex_position_start_or_after )? ~
+    XQuery_pattern ~ ( ^"FLAG" ~ XQuery_option_flag )? ~ ^"IN" ~ regex_subject_string ~
+    ( ^"FROM" ~ start_position )? ~ ( ^"USING" ~ char_length_units )? ~
+    ( ^"OCCURRENCE" ~ regex_occurrence )? ~ ( ^"GROUP" ~ regex_capture_group )? ~
+    right_paren
+  }
+
+regex_position_start_or_after = {
+    ^"START"
+  | ^"AFTER"
+  }
+
+regex_subject_string = {
+    character_value_expression
+  }
+
+regex_substring_function = {
+    ^"SUBSTRING_REGEX" ~ left_paren ~ XQuery_pattern ~ ( ^"FLAG" ~ XQuery_option_flag )? ~ ^"IN" ~
+    regex_subject_string ~ ( ^"FROM" ~ start_position )? ~
+    ( ^"USING" ~ char_length_units )? ~ ( ^"OCCURRENCE" ~ regex_occurrence )? ~
+    ( ^"GROUP" ~ regex_capture_group )? ~ right_paren
+  }
+
+regex_transliteration = {
+    ^"TRANSLATE_REGEX" ~ left_paren ~ XQuery_pattern ~ ( ^"FLAG" ~ XQuery_option_flag )? ~ ^"IN" ~
+    regex_subject_string ~ ( ^"WITH" ~ XQuery_replacement_string )? ~
+    ( ^"FROM" ~ start_position )? ~ ( ^"USING" ~ char_length_units )? ~
+    ( ^"OCCURRENCE" ~ regex_transliteration_occurrence )? ~ right_paren
+  }
+
+regex_transliteration_occurrence = {
+    regex_occurrence
+  | ^"ALL"
+  }
+
+regular_character_set = {
+    underscore
+  | left_bracket ~ character_enumeration+ ~ right_bracket
+  | left_bracket ~ circumflex ~ character_enumeration+ ~ right_bracket
+  | left_bracket ~ character_enumeration_include+ ~ circumflex ~ character_enumeration_exclude+ ~ right_bracket
+  }
+
+regular_character_set_identifier = {
+    identifier
+  }
+
+regular_expression = {
+    regular_term ~ (vertical_bar ~ regular_expression)*
+  }
+
+regular_expression_substring_function = {
+    ^"SUBSTRING" ~ left_paren ~ character_value_expression ~ ^"SIMILAR" ~
+    character_value_expression ~ ^"ESCAPE" ~ escape_character ~ right_paren
+  }
+
+regular_factor = {
+    regular_primary
+  | regular_primary ~ asterisk
+  | regular_primary ~ plus_sign
+  | regular_primary ~ question_mark
+  | regular_primary ~ repeat_factor
+  }
+
+regular_identifier = {
+    identifier_body
+  }
+
+regular_primary = {
+    character_specifier
+  | percent
+  | regular_character_set
+  | left_paren ~ regular_expression ~ right_paren
+  }
+
+regular_term = {
+    regular_factor ~ regular_term*
+  }
+
+regular_view_specification = {
+    left_paren ~ view_column_list ~ right_paren
+  }
+
+relative_category = {
+    ^"RELATIVE" ~ ^"WITH" ~ relative_function_specification
+  }
+
+relative_function_specification = {
+    specific_routine_designator
+  }
+
+release_savepoint_statement = {
+    ^"RELEASE" ~ ^"SAVEPOINT" ~ savepoint_specifier
+  }
+
+repeat_argument = {
+    numeric_value_expression
+  }
+
+repeat_factor = {
+    left_brace ~ low_value ~ ( upper_limit )? ~ right_brace
+  }
+
+repeatable_clause = {
+    ^"REPEATABLE" ~ left_paren ~ repeat_argument ~ right_paren
+  }
+
+representation = {
+    predefined_type
+  | collection_type
+  | member_list
+  }
+
+reserved_word = {
+    ^"ABS"
+  | ^"ACOS"
+  | ^"ALL"
+  | ^"ALLOCATE"
+  | ^"ALTER"
+  | ^"AND"
+  | ^"ANY"
+  | ^"ARE"
+  | ^"ARRAY"
+  | ^"ARRAY_AGG"
+  | ^"ARRAY_MAX_CARDINALITY"
+  | ^"AS"
+  | ^"ASENSITIVE"
+  | ^"ASIN"
+  | ^"ASYMMETRIC"
+  | ^"AT"
+  | ^"ATAN"
+  | ^"ATOMIC"
+  | ^"AUTHORIZATION"
+  | ^"AVG"
+  | ^"BEGIN"
+  | ^"BEGIN_FRAME"
+  | ^"BEGIN_PARTITION"
+  | ^"BETWEEN"
+  | ^"BIGINT"
+  | ^"BINARY"
+  | ^"BLOB"
+  | ^"BOOLEAN"
+  | ^"BOTH"
+  | ^"BY"
+  | ^"CALL"
+  | ^"CALLED"
+  | ^"CARDINALITY"
+  | ^"CASCADED"
+  | ^"CASE"
+  | ^"CAST"
+  | ^"CEIL"
+  | ^"CEILING"
+  | ^"CHAR"
+  | ^"CHAR_LENGTH"
+  | ^"CHARACTER"
+  | ^"CHARACTER_LENGTH"
+  | ^"CHECK"
+  | ^"CLASSIFIER"
+  | ^"CLOB"
+  | ^"CLOSE"
+  | ^"COALESCE"
+  | ^"COLLATE"
+  | ^"COLLECT"
+  | ^"COLUMN"
+  | ^"COMMIT"
+  | ^"CONDITION"
+  | ^"CONNECT"
+  | ^"CONSTRAINT"
+  | ^"CONTAINS"
+  | ^"CONVERT"
+  | ^"COPY"
+  | ^"CORR"
+  | ^"CORRESPONDING"
+  | ^"COS"
+  | ^"COSH"
+  | ^"COUNT"
+  | ^"COVAR_POP"
+  | ^"COVAR_SAMP"
+  | ^"CREATE"
+  | ^"CROSS"
+  | ^"CUBE"
+  | ^"CUME_DIST"
+  | ^"CURRENT"
+  | ^"CURRENT_CATALOG"
+  | ^"CURRENT_DATE"
+  | ^"CURRENT_DEFAULT_TRANSFORM_GROUP"
+  | ^"CURRENT_PATH"
+  | ^"CURRENT_ROLE"
+  | ^"CURRENT_ROW"
+  | ^"CURRENT_SCHEMA"
+  | ^"CURRENT_TIME"
+  | ^"CURRENT_TIMESTAMP"
+  | ^"CURRENT_PATH"
+  | ^"CURRENT_ROLE"
+  | ^"CURRENT_TRANSFORM_GROUP_FOR_TYPE"
+  | ^"CURRENT_USER"
+  | ^"CURSOR"
+  | ^"CYCLE"
+  | ^"DATE"
+  | ^"DAY"
+  | ^"DEALLOCATE"
+  | ^"DEC"
+  | ^"DECIMAL"
+  | ^"DECFLOAT"
+  | ^"DECLARE"
+  | ^"DEFAULT"
+  | ^"DEFINE"
+  | ^"DELETE"
+  | ^"DENSE_RANK"
+  | ^"DEREF"
+  | ^"DESCRIBE"
+  | ^"DETERMINISTIC"
+  | ^"DISCONNECT"
+  | ^"DISTINCT"
+  | ^"DOUBLE"
+  | ^"DROP"
+  | ^"DYNAMIC"
+  | ^"EACH"
+  | ^"ELEMENT"
+  | ^"FIELD"
+  | ^"ELSE"
+  | ^"EMPTY"
+  | ^"END"
+  | ^"END_FRAME"
+  | ^"END_PARTITION"
+  | ^"END_EXEC"
+  | ^"EQUALS"
+  | ^"ESCAPE"
+  | ^"EVERY"
+  | ^"EXCEPT"
+  | ^"EXEC"
+  | ^"EXECUTE"
+  | ^"EXISTS"
+  | ^"EXP"
+  | ^"EXTERNAL"
+  | ^"EXTRACT"
+  | ^"FALSE"
+  | ^"FETCH"
+  | ^"FILTER"
+  | ^"FIRST_VALUE"
+  | ^"FLOAT"
+  | ^"FLOOR"
+  | ^"FOR"
+  | ^"FOREIGN"
+  | ^"FRAME_ROW"
+  | ^"FREE"
+  | ^"FROM"
+  | ^"FULL"
+  | ^"FUNCTION"
+  | ^"FUSION"
+  | ^"GET"
+  | ^"GLOBAL"
+  | ^"GRANT"
+  | ^"GROUP"
+  | ^"GROUPING"
+  | ^"GROUPS"
+  | ^"HAVING"
+  | ^"HOLD"
+  | ^"HOUR"
+  | ^"IDENTITY"
+  | ^"IN"
+  | ^"INDICATOR"
+  | ^"INITIAL"
+  | ^"INNER"
+  | ^"INOUT"
+  | ^"INSENSITIVE"
+  | ^"INSERT"
+  | ^"INT"
+  | ^"INTEGER"
+  | ^"INTERSECT"
+  | ^"INTERSECTION"
+  | ^"INTERVAL"
+  | ^"INTO"
+  | ^"IS"
+  | ^"JOIN"
+  | ^"JSON_ARRAY"
+  | ^"JSON_ARRAYAGG"
+  | ^"JSON_EXISTS"
+  | ^"JSON_OBJECT"
+  | ^"JSON_OBJECTAGG"
+  | ^"JSON_QUERY"
+  | ^"JSON_TABLE"
+  | ^"JSON_TABLE_PRIMITIVE"
+  | ^"JSON_VALUE"
+  | ^"LAG"
+  | ^"LANGUAGE"
+  | ^"LARGE"
+  | ^"LAST_VALUE"
+  | ^"LATERAL"
+  | ^"LEAD"
+  | ^"LEADING"
+  | ^"LEFT"
+  | ^"LIKE"
+  | ^"LIKE_REGEX"
+  | ^"LISTAGG"
+  | ^"LN"
+  | ^"LOCAL"
+  | ^"LOCALTIME"
+  | ^"LOCALTIMESTAMP"
+  | ^"LOG"
+  | ^"LOG10"
+  | ^"LOWER"
+  | ^"MATCH"
+  | ^"MATCH_NUMBER"
+  | ^"MATCH_RECOGNIZE"
+  | ^"MATCHES"
+  | ^"MAX"
+  | ^"MEMBER"
+  | ^"MERGE"
+  | ^"METHOD"
+  | ^"MIN"
+  | ^"MINUTE"
+  | ^"MOD"
+  | ^"MODIFIES"
+  | ^"MODULE"
+  | ^"MONTH"
+  | ^"MULTISET"
+  | ^"NATIONAL"
+  | ^"NATURAL"
+  | ^"NCHAR"
+  | ^"NCLOB"
+  | ^"NEW"
+  | ^"NO"
+  | ^"NONE"
+  | ^"NORMALIZE"
+  | ^"NOT"
+  | ^"NTH_VALUE"
+  | ^"NTILE"
+  | ^"NULL"
+  | ^"NULLIF"
+  | ^"NUMERIC"
+  | ^"OCTET_LENGTH"
+  | ^"OCCURRENCES_REGEX"
+  | ^"OF"
+  | ^"OFFSET"
+  | ^"OLD"
+  | ^"OMIT"
+  | ^"ON"
+  | ^"ONE"
+  | ^"ONLY"
+  | ^"OPEN"
+  | ^"OR"
+  | ^"ORDER"
+  | ^"OUT"
+  | ^"OUTER"
+  | ^"OVER"
+  | ^"OVERLAPS"
+  | ^"OVERLAY"
+  | ^"PARAMETER"
+  | ^"PARTITION"
+  | ^"PATTERN"
+  | ^"PER"
+  | ^"PERCENT"
+  | ^"PERCENT_RANK"
+  | ^"PERCENTILE_CONT"
+  | ^"PERCENTILE_DISC"
+  | ^"PERIOD"
+  | ^"PORTION"
+  | ^"POSITION"
+  | ^"POSITION_REGEX"
+  | ^"POWER"
+  | ^"PRECEDES"
+  | ^"PRECISION"
+  | ^"PREPARE"
+  | ^"PRIMARY"
+  | ^"PROCEDURE"
+  | ^"PTF"
+  | ^"RANGE"
+  | ^"RANK"
+  | ^"READS"
+  | ^"REAL"
+  | ^"RECURSIVE"
+  | ^"REF"
+  | ^"REFERENCES"
+  | ^"REFERENCING"
+  | ^"REGR_AVGX"
+  | ^"REGR_AVGY"
+  | ^"REGR_COUNT"
+  | ^"REGR_INTERCEPT"
+  | ^"REGR_R2"
+  | ^"REGR_SLOPE"
+  | ^"REGR_SXX"
+  | ^"REGR_SXY"
+  | ^"REGR_SYY"
+  | ^"RELEASE"
+  | ^"RESULT"
+  | ^"RETURN"
+  | ^"RETURNS"
+  | ^"REVOKE"
+  | ^"RIGHT"
+  | ^"ROLLBACK"
+  | ^"ROLLUP"
+  | ^"ROW"
+  | ^"ROW_NUMBER"
+  | ^"ROWS"
+  | ^"RUNNING"
+  | ^"SAVEPOINT"
+  | ^"SCOPE"
+  | ^"SCROLL"
+  | ^"SEARCH"
+  | ^"SECOND"
+  | ^"SEEK"
+  | ^"SELECT"
+  | ^"SENSITIVE"
+  | ^"SESSION_USER"
+  | ^"SET"
+  | ^"SHOW"
+  | ^"SIMILAR"
+  | ^"SIN"
+  | ^"SINH"
+  | ^"SKIP"
+  | ^"SMALLINT"
+  | ^"SOME"
+  | ^"SPECIFIC"
+  | ^"SPECIFICTYPE"
+  | ^"SQL"
+  | ^"SQLEXCEPTION"
+  | ^"SQLSTATE"
+  | ^"SQLWARNING"
+  | ^"SQRT"
+  | ^"START"
+  | ^"STATIC"
+  | ^"STDDEV_POP"
+  | ^"STDDEV_SAMP"
+  | ^"SUBMULTISET"
+  | ^"SUBSET"
+  | ^"SUBSTRING"
+  | ^"SUBSTRING_REGEX"
+  | ^"SUCCEEDS"
+  | ^"SUM"
+  | ^"SYMMETRIC"
+  | ^"SYSTEM"
+  | ^"SYSTEM_TIME"
+  | ^"SYSTEM_USER"
+  | ^"TABLE"
+  | ^"TABLESAMPLE"
+  | ^"TAN"
+  | ^"TANH"
+  | ^"THEN"
+  | ^"TIME"
+  | ^"TIMESTAMP"
+  | ^"TIMEZONE_HOUR"
+  | ^"TIMEZONE_MINUTE"
+  | ^"TO"
+  | ^"TRAILING"
+  | ^"TRANSLATE"
+  | ^"TRANSLATE_REGEX"
+  | ^"TRANSLATION"
+  | ^"TREAT"
+  | ^"TRIGGER"
+  | ^"TRIM"
+  | ^"TRIM_ARRAY"
+  | ^"TRUE"
+  | ^"TRUNCATE"
+  | ^"UESCAPE"
+  | ^"UNION"
+  | ^"UNIQUE"
+  | ^"UNKNOWN"
+  | ^"UNNEST"
+  | ^"UPDATE"
+  | ^"UPPER"
+  | ^"USER"
+  | ^"USING"
+  | ^"VALUE"
+  | ^"VALUES"
+  | ^"VALUE_OF"
+  | ^"VAR_POP"
+  | ^"VAR_SAMP"
+  | ^"VARBINARY"
+  | ^"VARCHAR"
+  | ^"VARYING"
+  | ^"VERSIONING"
+  | ^"WHEN"
+  | ^"WHENEVER"
+  | ^"WHERE"
+  | ^"WIDTH_BUCKET"
+  | ^"WINDOW"
+  | ^"WITH"
+  | ^"WITHIN"
+  | ^"WITHOUT"
+  | ^"YEAR"
+  }
+
+result = {
+    result_expression
+  | ^"NULL"
+  }
+
+result_cast = {
+    ^"CAST" ~ ^"FROM" ~ result_cast_from_type
+  }
+
+result_cast_from_type = {
+    data_type ~ ( locator_indication )?
+  }
+
+result_expression = {
+    value_expression
+  }
+
+result_offset_clause = {
+    ^"OFFSET" ~ offset_row_count ~ ( ^"ROW" | ^"ROWS" )
+  }
+
+result_option = {
+    ^"FINAL"
+  | ^"NEW"
+  | ^"OLD"
+  }
+
+result_using_clause = {
+    output_using_clause
+  }
+
+return_statement = {
+    ^"RETURN" ~ return_value
+  }
+
+return_value = {
+    value_expression
+  | ^"NULL"
+  }
+
+returned_result_sets_characteristic = {
+    ^"DYNAMIC" ~ ^"RESULT" ~ ^"SETS" ~ maximum_returned_result_sets
+  }
+
+returns_clause = {
+    ^"RETURNS" ~ returns_type
+  }
+
+returns_data_type = {
+    data_type ~ ( locator_indication )?
+  }
+
+returns_table_type = {
+    ^"TABLE" ~ ( table_function_column_list )?
+  | ^"ONLY" ~ ^"PASS" ~ ^"THROUGH"
+  }
+
+returns_type = {
+    returns_data_type ~ ( result_cast )?
+  | returns_table_type
+  }
+
+reverse_solidus = {
+    "\\"
+  }
+
+revoke_option_extension = {
+    ^"GRANT" ~ ^"OPTION" ~ ^"FOR"
+  | ^"HIERARCHY" ~ ^"OPTION" ~ ^"FOR"
+  }
+
+revoke_privilege_statement = {
+    ^"REVOKE" ~ ( revoke_option_extension )? ~ privileges ~ ^"FROM" ~ grantee ~
+    (comma ~ grantee)* ~ ( ^"GRANTED" ~ ^"BY" ~ grantor )? ~ drop_behavior
+  }
+
+revoke_role_statement = {
+    ^"REVOKE" ~ ( ^"ADMIN" ~ ^"OPTION" ~ ^"FOR" )? ~ role_revoked ~ (comma ~ role_revoked)* ~
+    ^"FROM" ~ grantee ~ (comma ~ grantee)* ~ ( ^"GRANTED" ~ ^"BY" ~ grantor )? ~
+    drop_behavior
+  }
+
+revoke_statement = {
+    revoke_privilege_statement
+  | revoke_role_statement
+  }
+
+right_arrow = {
+    "->"
+  }
+
+right_brace = {
+    "}"
+  }
+
+right_bracket = {
+    "]"
+  }
+
+right_bracket_or_trigraph = {
+    right_bracket
+  | right_bracket_trigraph
+  }
+
+right_bracket_trigraph = {
+    "??)"
+  }
+
+right_minus_brace = {
+    "-}"
+  }
+
+right_paren = {
+    ")"
+  }
+
+rights_clause = {
+    ^"SQL" ~ ^"SECURITY" ~ ^"INVOKER"
+  | ^"SQL" ~ ^"SECURITY" ~ ^"DEFINER"
+  }
+
+role_definition = {
+    ^"CREATE" ~ ^"ROLE" ~ role_name ~ ( ^"WITH" ~ ^"ADMIN" ~ grantor )?
+  }
+
+role_granted = {
+    role_name
+  }
+
+role_name = {
+    identifier
+  }
+
+role_revoked = {
+    role_name
+  }
+
+role_specification = {
+    value_specification
+  | ^"NONE"
+  }
+
+rollback_statement = {
+    ^"ROLLBACK" ~ ( ^"WORK" )? ~ ( ^"AND" ~ ( ^"NO" )? ~ ^"CHAIN" )? ~ ( savepoint_clause )?
+  }
+
+rollup_list = {
+    ^"ROLLUP" ~ left_paren ~ ordinary_grouping_set_list ~ right_paren
+  }
+
+routine_body = {
+    SQL_routine_spec
+  | external_body_reference
+  | polymorphic_table_function_body
+  }
+
+routine_characteristic = {
+    language_clause
+  | parameter_style_clause
+  | ^"SPECIFIC" ~ specific_name
+  | deterministic_characteristic
+  | SQL_data_access_indication
+  | null_call_clause
+  | returned_result_sets_characteristic
+  | savepoint_level_indication
+  }
+
+routine_characteristics = {
+    ( routine_characteristic )*
+  }
+
+routine_invocation = {
+    routine_name ~ SQL_argument_list
+  }
+
+routine_name = {
+    ( schema_name ~ period )? ~ qualified_identifier
+  }
+
+routine_type = {
+    ^"ROUTINE"
+  | ^"FUNCTION"
+  | ^"PROCEDURE"
+  | ( ^"INSTANCE" | ^"STATIC" | ^"CONSTRUCTOR" )? ~ ^"METHOD"
+  }
+
+row_marker = {
+    ^"BEGIN_PARTITION"
+  | ^"BEGIN_FRAME"
+  | ^"CURRENT_ROW"
+  | ^"FRAME_ROW"
+  | ^"END_FRAME"
+  | ^"END_PARTITION"
+  }
+
+row_marker_delta = {
+    plus_sign ~ row_marker_offset
+  | minus_sign ~ row_marker_offset
+  }
+
+row_marker_expression = {
+    row_marker ~ ( row_marker_delta )?
+  }
+
+row_marker_offset = {
+    simple_value_specification
+  | dynamic_parameter_specification
+  }
+
+row_pattern = {
+    row_pattern_term
+  | row_pattern_alternation
+  }
+
+row_pattern_alternation = {
+    row_pattern_term ~ vertical_bar ~ row_pattern
+  }
+
+row_pattern_common_syntax = {
+    ( ^"AFTER" ~ ^"MATCH" ~ row_pattern_skip_to )? ~ ( row_pattern_initial_or_seek )? ~
+    ^"PATTERN" ~ left_paren ~ row_pattern ~ right_paren ~
+    ( row_pattern_subset_clause )? ~ ^"DEFINE" ~ row_pattern_definition_list
+  }
+
+row_pattern_count_function = {
+    ^"COUNT" ~ left_paren ~ row_pattern_variable_name ~ period ~ asterisk ~
+    right_paren
+  }
+
+row_pattern_definition = {
+    row_pattern_definition_variable_name ~ ^"AS" ~
+    row_pattern_definition_search_condition
+  }
+
+row_pattern_definition_list = {
+    row_pattern_definition ~ (comma ~ row_pattern_definition)*
+  }
+
+row_pattern_definition_search_condition = {
+    search_condition
+  }
+
+row_pattern_definition_variable_name = {
+    row_pattern_variable_name
+  }
+
+row_pattern_empty_match_handling = {
+    ^"SHOW" ~ ^"EMPTY" ~ ^"MATCHES"
+  | ^"OMIT" ~ ^"EMPTY" ~ ^"MATCHES"
+  | ^"WITH" ~ ^"UNMATCHED" ~ ^"ROWS"
+  }
+
+row_pattern_factor = {
+    row_pattern_primary ~ ( row_pattern_quantifier )?
+  }
+
+row_pattern_initial_or_seek = {
+    ^"INITIAL"
+  | ^"SEEK"
+  }
+
+row_pattern_input_derived_column_list = {
+    parenthesized_derived_column_list
+  }
+
+row_pattern_input_name = {
+    correlation_name
+  }
+
+row_pattern_measure_definition = {
+    row_pattern_measure_expression ~ ^"AS" ~ measure_name
+  }
+
+row_pattern_measure_expression = {
+    value_expression
+  }
+
+row_pattern_measure_list = {
+    row_pattern_measure_definition ~
+    (comma ~ row_pattern_measure_definition)*
+  }
+
+row_pattern_measures = {
+    ^"MEASURES" ~ row_pattern_measure_list
+  }
+
+row_pattern_navigation_operation = {
+    row_pattern_navigation_logical
+  | row_pattern_navigation_physical
+  | row_pattern_navigation_compound
+  }
+
+row_pattern_navigation_compound = {
+    prev_or_next ~ left_paren ~ ( running_or_final )? ~ first_or_last ~
+    left_paren ~ value_expression ~ ( comma ~ logical_offset )? ~ right_paren ~
+    ( comma ~ physical_offset )? ~ right_paren
+  }
+
+row_pattern_navigation_logical = {
+    ( running_or_final )? ~ first_or_last ~ left_paren ~ value_expression ~
+    ( comma ~ logical_offset )? ~ right_paren
+  }
+
+row_pattern_navigation_physical = {
+    prev_or_next ~ left_paren ~ value_expression ~ ( comma ~ physical_offset )? ~
+    right_paren
+  }
+
+row_pattern_order_by = {
+    ^"ORDER" ~ ^"BY" ~ sort_specification_list
+  }
+
+row_pattern_output_derived_column_list = {
+    parenthesized_derived_column_list
+  }
+
+row_pattern_output_name = {
+    correlation_name
+  }
+
+row_pattern_partition_by = {
+    ^"PARTITION" ~ ^"BY" ~ row_pattern_partition_list
+  }
+
+row_pattern_partition_column = {
+    column_reference ~ ( collate_clause )?
+  }
+
+row_pattern_partition_list = {
+    row_pattern_partition_column ~
+    (comma ~ row_pattern_partition_column)*
+  }
+
+row_pattern_permute = {
+    ^"PERMUTE" ~ left_paren ~ row_pattern ~ (comma ~ row_pattern)* ~
+    right_paren
+  }
+
+row_pattern_primary = {
+    row_pattern_primary_variable_name
+  | dollar_sign
+  | circumflex
+  | left_paren ~ ( row_pattern )? ~ right_paren
+  | left_brace_minus ~ row_pattern ~ right_minus_brace
+  | row_pattern_permute
+  }
+
+row_pattern_primary_variable_name = {
+    row_pattern_variable_name
+  }
+
+row_pattern_quantifier = {
+    asterisk ~ ( question_mark )?
+  | plus_sign ~ ( question_mark )?
+  | question_mark ~ ( question_mark )?
+  | left_brace ~ ( unsigned_integer )? ~ comma ~ ( unsigned_integer )? ~
+    right_brace ~ ( question_mark )?
+  | left_brace ~ unsigned_integer ~ right_brace
+  }
+
+row_pattern_recognition_clause = {
+    ^"MATCH_RECOGNIZE" ~ left_paren ~ ( row_pattern_partition_by )? ~
+    ( row_pattern_order_by )? ~ ( row_pattern_measures )? ~
+    ( row_pattern_rows_per_match )? ~ row_pattern_common_syntax ~ right_paren
+  }
+
+row_pattern_recognition_clause_and_name = {
+    ( ( ^"AS" )? ~ row_pattern_input_name ~ ( row_pattern_input_derived_column_list )? )? ~
+    row_pattern_recognition_clause ~
+    ( ( ^"AS" )? ~ row_pattern_output_name ~ ( row_pattern_output_derived_column_list )? )?
+  }
+
+row_pattern_rows_per_match = {
+    ^"ONE" ~ ^"ROW" ~ ^"PER" ~ ^"MATCH"
+  | ^"ALL" ~ ^"ROWS" ~ ^"PER" ~ ^"MATCH" ~ ( row_pattern_empty_match_handling )?
+  }
+
+row_pattern_skip_to = {
+    ^"SKIP" ~ ^"TO" ~ ^"NEXT" ~ ^"ROW"
+  | ^"SKIP" ~ ^"PAST" ~ ^"LAST" ~ ^"ROW"
+  | ^"SKIP" ~ ^"TO" ~ ^"FIRST" ~ row_pattern_skip_to_variable_name
+  | ^"SKIP" ~ ^"TO" ~ ^"LAST" ~ row_pattern_skip_to_variable_name
+  | ^"SKIP" ~ ^"TO" ~ row_pattern_skip_to_variable_name
+  }
+
+row_pattern_skip_to_variable_name = {
+    row_pattern_variable_name
+  }
+
+row_pattern_subset_clause = {
+    ^"SUBSET" ~ row_pattern_subset_list
+  }
+
+row_pattern_subset_item = {
+    row_pattern_subset_item_variable_name ~ equals_operator ~ left_paren ~
+    row_pattern_subset_rhs ~ right_paren
+  }
+
+row_pattern_subset_item_variable_name = {
+    row_pattern_variable_name
+  }
+
+row_pattern_subset_list = {
+    row_pattern_subset_item ~ (comma ~ row_pattern_subset_item)*
+  }
+
+row_pattern_subset_rhs = {
+    row_pattern_subset_rhs_variable_name ~
+    (comma ~ row_pattern_subset_rhs_variable_name)*
+  }
+
+row_pattern_subset_rhs_variable_name = {
+    row_pattern_variable_name
+  }
+
+row_pattern_term = {
+    row_pattern_factor+
+  }
+
+row_pattern_variable_name = {
+    correlation_name
+  }
+
+row_subquery = {
+    subquery
+  }
+
+row_type = {
+    ^"ROW" ~ row_type_body
+  }
+
+row_type_body = {
+    left_paren ~ field_definition ~ (comma ~ field_definition)* ~
+    right_paren
+  }
+
+row_value_constructor = {
+    common_value_expression
+  | boolean_value_expression
+  | explicit_row_value_constructor
+  }
+
+row_value_constructor_element = {
+    value_expression
+  }
+
+row_value_constructor_element_list = {
+    row_value_constructor_element ~
+    (comma ~ row_value_constructor_element)*
+  }
+
+row_value_constructor_predicand = {
+    common_value_expression
+  | boolean_predicand
+  | explicit_row_value_constructor
+  }
+
+row_value_expression = {
+    explicit_row_value_constructor
+  | row_value_special_case
+  }
+
+row_value_expression_list = {
+    table_row_value_expression ~ (comma ~ table_row_value_expression)*
+  }
+
+row_value_predicand = {
+    row_value_special_case
+  | row_value_constructor_predicand
+  }
+
+row_value_predicand_1 = {
+    row_value_predicand
+  }
+
+row_value_predicand_2 = {
+    row_value_predicand
+  }
+
+row_value_predicand_3 = {
+    row_value_predicand
+  }
+
+row_value_predicand_4 = {
+    row_value_predicand
+  }
+
+row_value_special_case = {
+    nonparenthesized_value_expression_primary
+  }
+
+running_or_final = {
+    ^"RUNNING"
+  | ^"FINAL"
+  }
+
+sample_clause = {
+    ^"TABLESAMPLE" ~ sample_method ~ left_paren ~ sample_percentage ~ right_paren ~
+    ( repeatable_clause )?
+  }
+
+sample_method = {
+    ^"BERNOULLI"
+  | ^"SYSTEM"
+  }
+
+sample_percentage = {
+    numeric_value_expression
+  }
+
+savepoint_clause = {
+    ^"TO" ~ ^"SAVEPOINT" ~ savepoint_specifier
+  }
+
+savepoint_level_indication = {
+    ^"NEW" ~ ^"SAVEPOINT" ~ ^"LEVEL"
+  | ^"OLD" ~ ^"SAVEPOINT" ~ ^"LEVEL"
+  }
+
+savepoint_name = {
+    identifier
+  }
+
+savepoint_specifier = {
+    savepoint_name
+  }
+
+savepoint_statement = {
+    ^"SAVEPOINT" ~ savepoint_specifier
+  }
+
+scalar_subquery = {
+    subquery
+  }
+
+scale = {
+    unsigned_integer
+  }
+
+schema_authorization_identifier = {
+    authorization_identifier
+  }
+
+schema_character_set_or_path = {
+    schema_character_set_specification
+  | schema_path_specification
+  | schema_character_set_specification ~ schema_path_specification
+  | schema_path_specification ~ schema_character_set_specification
+  }
+
+schema_character_set_specification = {
+    ^"DEFAULT" ~ ^"CHARACTER" ~ ^"SET" ~ character_set_specification
+  }
+
+schema_definition = {
+    ^"CREATE" ~ ^"SCHEMA" ~ schema_name_clause ~ ( schema_character_set_or_path )? ~
+    ( schema_element )*
+  }
+
+schema_element = {
+    table_definition
+  | view_definition
+  | domain_definition
+  | character_set_definition
+  | collation_definition
+  | transliteration_definition
+  | assertion_definition
+  | trigger_definition
+  | user_defined_type_definition
+  | user_defined_cast_definition
+  | user_defined_ordering_definition
+  | transform_definition
+  | schema_routine
+  | sequence_generator_definition
+  | grant_statement
+  | role_definition
+  }
+
+schema_function = {
+    ^"CREATE" ~ SQL_invoked_function
+  }
+
+schema_name = {
+    ( catalog_name ~ period )? ~ unqualified_schema_name
+  }
+
+schema_name_characteristic = {
+    ^"SCHEMA" ~ value_specification
+  }
+
+schema_name_clause = {
+    schema_name
+  | ^"AUTHORIZATION" ~ schema_authorization_identifier
+  | schema_name ~ ^"AUTHORIZATION" ~ schema_authorization_identifier
+  }
+
+schema_name_list = {
+    schema_name ~ (comma ~ schema_name)*
+  }
+
+schema_path_specification = {
+    path_specification
+  }
+
+schema_procedure = {
+    ^"CREATE" ~ SQL_invoked_procedure
+  }
+
+schema_qualified_name = {
+    ( schema_name ~ period )? ~ qualified_identifier
+  }
+
+schema_qualified_routine_name = {
+    schema_qualified_name
+  }
+
+schema_routine = {
+    schema_procedure
+  | schema_function
+  }
+
+schema_resolved_user_defined_type_name = {
+    user_defined_type_name
+  }
+
+scope_clause = {
+    ^"SCOPE" ~ table_name
+  }
+
+scope_option = {
+    ^"GLOBAL"
+  | ^"LOCAL"
+  }
+
+search_clause = {
+    ^"SEARCH" ~ recursive_search_order ~ ^"SET" ~ sequence_column
+  }
+
+search_condition = {
+    boolean_value_expression
+  }
+
+search_or_cycle_clause = {
+    search_clause
+  | cycle_clause
+  | search_clause ~ cycle_clause
+  }
+
+searched_case = {
+    ^"CASE" ~ searched_when_clause+ ~ ( else_clause )? ~ ^"END"
+  }
+
+searched_when_clause = {
+    ^"WHEN" ~ search_condition ~ ^"THEN" ~ result
+  }
+
+seconds_fraction = {
+    unsigned_integer
+  }
+
+seconds_integer_value = {
+    unsigned_integer
+  }
+
+seconds_value = {
+    seconds_integer_value ~ ( period ~ ( seconds_fraction )? )?
+  }
+
+select_list = {
+    SOI ~ (asterisk | (select_sublist ~ (comma ~ select_sublist)*)) ~ EOI
+  }
+
+select_statement_single_row = {
+    ^"SELECT" ~ ( set_quantifier )? ~ select_list ~ ^"INTO" ~ select_target_list ~
+    table_expression
+  }
+
+select_sublist = {
+    derived_column
+  | qualified_asterisk
+  }
+
+select_target_list = {
+    target_specification ~ (comma ~ target_specification)*
+  }
+
+self_referencing_column_name = {
+    column_name
+  }
+
+self_referencing_column_specification = {
+    ^"REF" ~ ^"IS" ~ self_referencing_column_name ~ ( reference_generation )?
+  }
+
+semicolon = {
+    ";"
+  }
+
+separator = {
+    ( comment ~ WHITESPACE )+
+  }
+
+sequence_column = {
+    column_name
+  }
+
+sequence_generator_cycle_option = {
+    ^"CYCLE"
+  | ^"NO" ~ ^"CYCLE"
+  }
+
+sequence_generator_data_type_option = {
+    ^"AS" ~ data_type
+  }
+
+sequence_generator_definition = {
+    ^"CREATE" ~ ^"SEQUENCE" ~ sequence_generator_name ~ ( sequence_generator_options )?
+  }
+
+sequence_generator_increment = {
+    signed_numeric_literal
+  }
+
+sequence_generator_increment_by_option = {
+    ^"INCREMENT" ~ ^"BY" ~ sequence_generator_increment
+  }
+
+sequence_generator_max_value = {
+    signed_numeric_literal
+  }
+
+sequence_generator_maxvalue_option = {
+    ^"MAXVALUE" ~ sequence_generator_max_value
+  | ^"NO" ~ ^"MAXVALUE"
+  }
+
+sequence_generator_min_value = {
+    signed_numeric_literal
+  }
+
+sequence_generator_minvalue_option = {
+    ^"MINVALUE" ~ sequence_generator_min_value
+  | ^"NO" ~ ^"MINVALUE"
+  }
+
+sequence_generator_name = {
+    schema_qualified_name
+  }
+
+sequence_generator_option = {
+    sequence_generator_data_type_option
+  | common_sequence_generator_options
+  }
+
+sequence_generator_options = {
+    sequence_generator_option+
+  }
+
+sequence_generator_restart_value = {
+    signed_numeric_literal
+  }
+
+sequence_generator_start_value = {
+    signed_numeric_literal
+  }
+
+sequence_generator_start_with_option = {
+    ^"START" ~ ^"WITH" ~ sequence_generator_start_value
+  }
+
+session_characteristic = {
+    session_transaction_characteristics
+  }
+
+session_characteristic_list = {
+    session_characteristic ~ (comma ~ session_characteristic)*
+  }
+
+session_transaction_characteristics = {
+    ^"TRANSACTION" ~ transaction_mode ~ (comma ~ transaction_mode)*
+  }
+
+set_catalog_statement = {
+    ^"SET" ~ catalog_name_characteristic
+  }
+
+set_clause = {
+    multiple_column_assignment
+  | set_target ~ equals_operator ~ update_source
+  }
+
+set_clause_list = {
+    set_clause ~ (comma ~ set_clause)*
+  }
+
+set_column_default_clause = {
+    ^"SET" ~ default_clause
+  }
+
+set_column_not_null_clause = {
+    ^"SET" ~ ^"NOT" ~ ^"NULL"
+  }
+
+set_connection_statement = {
+    ^"SET" ~ ^"CONNECTION" ~ connection_object
+  }
+
+set_constraints_mode_statement = {
+    ^"SET" ~ ^"CONSTRAINTS" ~ constraint_name_list ~ ( ^"DEFERRED" | ^"IMMEDIATE" )
+  }
+
+set_descriptor_information = {
+    set_header_information ~ (comma ~ set_header_information)*
+  | ^"VALUE" ~ item_number ~ set_item_information ~ (comma ~ set_item_information)*
+  }
+
+set_descriptor_statement = {
+    ^"SET" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ descriptor_name ~ set_descriptor_information
+  }
+
+set_domain_default_clause = {
+    ^"SET" ~ default_clause
+  }
+
+set_function_specification = {
+    ( running_or_final )? ~ aggregate_function
+  | grouping_operation
+  }
+
+set_function_type = {
+    computational_operation
+  }
+
+set_header_information = {
+    header_item_name ~ equals_operator ~ simple_value_specification_1
+  }
+
+set_identity_column_generation_clause = {
+    ^"SET" ~ ^"GENERATED" ~ ( ^"ALWAYS" | (^"BY" ~ ^"DEFAULT") )
+  }
+
+set_item_information = {
+    descriptor_item_name ~ equals_operator ~ simple_value_specification_2
+  }
+
+set_local_time_zone_statement = {
+    ^"SET" ~ ^"TIME" ~ ^"ZONE" ~ set_time_zone_value
+  }
+
+set_names_statement = {
+    ^"SET" ~ character_set_name_characteristic
+  }
+
+set_path_statement = {
+    ^"SET" ~ SQL_path_characteristic
+  }
+
+set_predicate = {
+    row_value_predicand ~ set_predicate_part_2
+  }
+
+set_predicate_part_2 = {
+    ^"IS" ~ ( ^"NOT" )? ~ ^"A" ~ ^"SET"
+  }
+
+set_quantifier = {
+    ^"DISTINCT"
+  | ^"ALL"
+  }
+
+set_role_statement = {
+    ^"SET" ~ ^"ROLE" ~ role_specification
+  }
+
+set_schema_statement = {
+    ^"SET" ~ schema_name_characteristic
+  }
+
+set_session_characteristics_statement = {
+    ^"SET" ~ ^"SESSION" ~ ^"CHARACTERISTICS" ~ ^"AS" ~ session_characteristic_list
+  }
+
+set_session_collation_statement = {
+    ^"SET" ~ ^"COLLATION" ~ collation_specification ~ ( ^"FOR" ~ character_set_specification_list )?
+  | ^"SET" ~ ^"NO" ~ ^"COLLATION" ~ ( ^"FOR" ~ character_set_specification_list )?
+  }
+
+set_session_user_identifier_statement = {
+    ^"SET" ~ ^"SESSION" ~ ^"AUTHORIZATION" ~ value_specification
+  }
+
+set_target = {
+    update_target
+  | mutated_set_clause
+  }
+
+set_target_list = {
+    left_paren ~ set_target ~ (comma ~ set_target)* ~ right_paren
+  }
+
+set_time_zone_value = {
+    interval_value_expression
+  | ^"LOCAL"
+  }
+
+set_transaction_statement = {
+    ^"SET" ~ ( ^"LOCAL" )? ~ ^"TRANSACTION" ~ transaction_characteristics
+  }
+
+set_transform_group_statement = {
+    ^"SET" ~ transform_group_characteristic
+  }
+
+sign = {
+    plus_sign
+  | minus_sign
+  }
+
+signed_integer = @{
+    ( sign )? ~ unsigned_integer
+  }
+
+signed_numeric_literal = @{
+    ( sign )? ~ unsigned_numeric_literal
+  }
+
+similar_pattern = {
+    character_value_expression
+  }
+
+similar_predicate = {
+    row_value_predicand ~ similar_predicate_part_2
+  }
+
+similar_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"SIMILAR" ~ ^"TO" ~ similar_pattern ~ ( ^"ESCAPE" ~ escape_character )?
+  }
+
+simple_Latin_letter = {
+    simple_Latin_upper_case_letter
+  | simple_Latin_lower_case_letter
+  }
+
+simple_Latin_lower_case_letter = {
+    "a"
+  | "b"
+  | "c"
+  | "d"
+  | "e"
+  | "f"
+  | "g"
+  | "h"
+  | "i"
+  | "j"
+  | "k"
+  | "l"
+  | "m"
+  | "n"
+  | "o"
+  | "p"
+  | "q"
+  | "r"
+  | "s"
+  | "t"
+  | "u"
+  | "v"
+  | "w"
+  | "x"
+  | "y"
+  | "z"
+  }
+
+simple_Latin_upper_case_letter = {
+    "A"
+  | "B"
+  | "C"
+  | "D"
+  | "E"
+  | "F"
+  | "G"
+  | "H"
+  | "I"
+  | "J"
+  | "K"
+  | "L"
+  | "M"
+  | "N"
+  | "O"
+  | "P"
+  | "Q"
+  | "R"
+  | "S"
+  | "T"
+  | "U"
+  | "V"
+  | "W"
+  | "X"
+  | "Y"
+  | "Z"
+  }
+
+simple_case = {
+    ^"CASE" ~ case_operand ~ simple_when_clause+ ~ ( else_clause )? ~ ^"END"
+  }
+
+simple_comment = {
+    simple_comment_introducer ~ ( comment_character )* ~ newline
+  }
+
+simple_comment_introducer = {
+    minus_sign ~ minus_sign
+  }
+
+simple_table = {
+    query_specification
+  | table_value_constructor
+  | explicit_table
+  }
+
+simple_target_specification = {
+    host_parameter_name
+  | SQL_parameter_reference
+  | column_reference
+  | embedded_variable_name
+  }
+
+simple_target_specification_1 = {
+    simple_target_specification
+  }
+
+simple_target_specification_2 = {
+    simple_target_specification
+  }
+
+simple_value_specification = {
+    literal
+  | host_parameter_name
+  | SQL_parameter_reference
+  | embedded_variable_name
+  }
+
+simple_value_specification_1 = {
+    simple_value_specification
+  }
+
+simple_value_specification_2 = {
+    simple_value_specification
+  }
+
+simple_when_clause = {
+    ^"WHEN" ~ when_operand_list ~ ^"THEN" ~ result
+  }
+
+single_datetime_field = {
+    non_second_primary_datetime_field ~ ( left_paren ~ interval_leading_field_precision ~ right_paren )?
+  | ^"SECOND" ~ ( left_paren ~ interval_leading_field_precision ~ ( comma ~ interval_fractional_seconds_precision )? ~ right_paren )?
+  }
+
+single_group_specification = {
+    group_name
+  }
+
+solidus = {
+    "/"
+  }
+
+some = {
+    ^"SOME"
+  | ^"ANY"
+  }
+
+sort_key = {
+    value_expression
+  }
+
+sort_specification = {
+    sort_key ~ ( ordering_specification )? ~ ( null_ordering )?
+  }
+
+sort_specification_list = {
+    sort_specification ~ (comma ~ sort_specification)*
+  }
+
+source_character_set_specification = {
+    character_set_specification
+  }
+
+source_data_type = {
+    data_type
+  }
+
+source_descriptor_name = {
+    descriptor_name
+  }
+
+space = {
+    WHITE_SPACE
+  }
+
+specific_method_name = {
+    ( schema_name ~ period )? ~ qualified_identifier
+  }
+
+specific_method_specification_designator = {
+    ( ^"INSTANCE" | ^"STATIC" | ^"CONSTRUCTOR" )? ~ ^"METHOD" ~ method_name ~ data_type_list
+  }
+
+specific_name = {
+    schema_qualified_name
+  }
+
+specific_routine_designator = {
+    ^"SPECIFIC" ~ routine_type ~ specific_name
+  | routine_type ~ member_name ~ ( ^"FOR" ~ schema_resolved_user_defined_type_name )?
+  }
+
+specific_type_method = {
+    user_defined_type_value_expression ~ period ~ ^"SPECIFICTYPE" ~
+    ( left_paren ~ right_paren )?
+  }
+
+square_root = {
+    ^"SQRT" ~ left_paren ~ numeric_value_expression ~ right_paren
+  }
+
+standard_character_set_name = {
+    character_set_name
+  }
+
+start_field = {
+    non_second_primary_datetime_field ~
+    ( left_paren ~ interval_leading_field_precision ~ right_paren )?
+  }
+
+start_position = {
+    numeric_value_expression
+  }
+
+start_transaction_statement = {
+    ^"START" ~ ^"TRANSACTION" ~ ( transaction_characteristics )?
+  }
+
+state_category = {
+    ^"STATE" ~ ( specific_name )?
+  }
+
+statement_information = {
+    statement_information_item ~ (comma ~ statement_information_item)*
+  }
+
+statement_information_item = {
+    simple_target_specification ~ equals_operator ~
+    statement_information_item_name
+  }
+
+statement_information_item_name = {
+    ^"NUMBER"
+  | ^"MORE"
+  | ^"COMMAND_FUNCTION"
+  | ^"COMMAND_FUNCTION_CODE"
+  | ^"DYNAMIC_FUNCTION"
+  | ^"DYNAMIC_FUNCTION_CODE"
+  | ^"ROW_COUNT"
+  | ^"TRANSACTIONS_COMMITTED"
+  | ^"TRANSACTIONS_ROLLED_BACK"
+  | ^"TRANSACTION_ACTIVE"
+  }
+
+statement_name = {
+    identifier
+  }
+
+statement_or_declaration = {
+    declare_cursor
+  | dynamic_declare_cursor
+  | temporary_table_declaration
+  | embedded_authorization_declaration
+  | embedded_path_specification
+  | embedded_transform_group_specification
+  | embedded_collation_specification
+  | embedded_exception_declaration
+  | SQL_procedure_statement
+  }
+
+static_method_invocation = {
+    path_resolved_user_defined_type_name ~ double_colon ~ method_name ~
+    ( SQL_argument_list )?
+  }
+
+static_method_selection = {
+    routine_invocation
+  }
+
+status_parameter = {
+    ^"SQLSTATE"
+  }
+
+string_length = {
+    numeric_value_expression
+  }
+
+string_value_expression = {
+    character_value_expression
+  | binary_value_expression
+  }
+
+string_value_function = {
+    character_value_function
+  | binary_value_function
+  | JSON_value_constructor
+  | JSON_query
+  }
+
+submultiset_predicate = {
+    row_value_predicand ~ submultiset_predicate_part_2
+  }
+
+submultiset_predicate_part_2 = {
+    ( ^"NOT" )? ~ ^"SUBMULTISET" ~ ( ^"OF" )? ~ multiset_value_expression
+  }
+
+subquery = {
+    left_paren ~ query_expression ~ right_paren
+  }
+
+subtable_clause = {
+    ^"UNDER" ~ supertable_clause
+  }
+
+subtype_clause = {
+    ^"UNDER" ~ supertype_name
+  }
+
+subtype_operand = {
+    value_expression
+  }
+
+subtype_treatment = {
+    ^"TREAT" ~ left_paren ~ subtype_operand ~ ^"AS" ~ target_subtype ~ right_paren
+  }
+
+subview_clause = {
+    ^"UNDER" ~ table_name
+  }
+
+supertable_clause = {
+    supertable_name
+  }
+
+supertable_name = {
+    table_name
+  }
+
+supertype_name = {
+    path_resolved_user_defined_type_name
+  }
+
+system_or_application_time_period_specification = {
+    system_time_period_specification
+  | application_time_period_specification
+  }
+
+system_time_period_end_column_specification = {
+    timestamp_generation_rule ~ ^"AS" ~ ^"ROW" ~ ^"END"
+  }
+
+system_time_period_specification = {
+    ^"PERIOD" ~ ^"FOR" ~ ^"SYSTEM_TIME"
+  }
+
+system_time_period_start_column_specification = {
+    timestamp_generation_rule ~ ^"AS" ~ ^"ROW" ~ ^"START"
+  }
+
+system_versioning_clause = {
+    ^"SYSTEM" ~ ^"VERSIONING"
+  }
+
+system_generated_representation = {
+    ^"REF" ~ ^"IS" ~ ^"SYSTEM" ~ ^"GENERATED"
+  }
+
+table_argument = {
+    table_argument_proper ~
+    ( ( ^"AS" )? ~ table_argument_correlation_name ~ ( table_argument_parenthesized_derived_column_list )? )? ~
+    ( table_argument_partitioning )? ~ ( table_argument_pruning )? ~
+    ( table_argument_ordering )?
+  }
+
+table_argument_correlation_name = {
+    correlation_name
+  }
+
+table_argument_ordering = {
+    ^"ORDER" ~ ^"BY" ~ table_argument_ordering_list
+  }
+
+table_argument_ordering_column = {
+    column_reference ~ ( ordering_specification )? ~ ( null_ordering )?
+  }
+
+table_argument_ordering_list = {
+    table_argument_ordering_column
+  | left_paren ~ table_argument_ordering_column ~ (comma ~ table_argument_ordering_column)* ~ right_paren
+  }
+
+table_argument_parenthesized_derived_column_list = {
+    parenthesized_derived_column_list
+  }
+
+table_argument_partitioning = {
+    ^"PARTITION" ~ ^"BY" ~ table_argument_partitioning_list
+  }
+
+table_argument_partitioning_list = {
+    column_reference
+  | left_paren ~ ( column_reference ~ (comma ~ column_reference)* )? ~ right_paren
+  }
+
+table_argument_proper = {
+    ^"TABLE" ~ left_paren ~ table_or_query_name ~ right_paren
+  | ^"TABLE" ~ table_subquery
+  | table_function_invocation
+  }
+
+table_argument_pruning = {
+    ^"PRUNE" ~ ^"WHEN" ~ ^"EMPTY"
+  | ^"KEEP" ~ ^"WHEN" ~ ^"EMPTY"
+  }
+
+table_commit_action = {
+    ^"PRESERVE"
+  | ^"DELETE"
+  }
+
+table_constraint = {
+    unique_constraint_definition
+  | referential_constraint_definition
+  | check_constraint_definition
+  }
+
+table_constraint_definition = {
+    ( constraint_name_definition )? ~ table_constraint ~
+    ( constraint_characteristics )?
+  }
+
+table_contents_source = {
+    table_element_list
+  | typed_table_clause
+  | as_subquery_clause
+  }
+
+table_definition = {
+    ^"CREATE" ~ ( table_scope )? ~ ^"TABLE" ~ table_name ~ table_contents_source ~
+    ( ^"WITH" ~ system_versioning_clause )? ~
+    ( ^"ON" ~ ^"COMMIT" ~ table_commit_action ~ ^"ROWS" )?
+  }
+
+table_element = {
+    column_definition
+  | table_period_definition
+  | table_constraint_definition
+  | like_clause
+  }
+
+table_element_list = {
+    left_paren ~ table_element ~ (comma ~ table_element)* ~ right_paren
+  }
+
+table_expression = {
+    from_clause ~ (where_clause)? ~ (group_by_clause)? ~ (having_clause)? ~ (window_clause)?
+  }
+
+table_factor = {
+    table_primary ~ ( sample_clause )?
+  }
+
+table_function_column_list = {
+    left_paren ~ table_function_column_list_element ~
+    (comma ~ table_function_column_list_element)* ~ right_paren
+  }
+
+table_function_column_list_element = {
+    column_name ~ data_type
+  }
+
+table_function_derived_table = {
+    ^"TABLE" ~ left_paren ~ collection_value_expression ~ right_paren
+  }
+
+table_function_invocation = {
+    routine_invocation
+  }
+
+table_name = @{
+    local_or_schema_qualified_name
+  }
+
+table_or_query_name = {
+    table_name
+  | transition_table_name
+  | query_name
+  }
+
+table_period_definition = {
+    system_or_application_time_period_specification ~ left_paren ~
+    period_begin_column_name ~ comma ~ period_end_column_name ~ right_paren
+  }
+
+table_primary = {
+    table_or_query_name ~ ( query_system_time_period_specification )? ~
+    ( correlation_or_recognition )?
+  | derived_table ~ correlation_or_recognition
+  | lateral_derived_table ~ correlation_or_recognition
+  | collection_derived_table ~ correlation_or_recognition
+  | table_function_derived_table ~ correlation_or_recognition
+  | PTF_derived_table ~ ( correlation_or_recognition )?
+  | only_spec ~ ( correlation_or_recognition )?
+  | data_change_delta_table ~ ( correlation_or_recognition )?
+  | JSON_table ~ correlation_or_recognition
+  | JSON_table_primitive ~ correlation_name
+  | parenthesized_joined_table
+  }
+
+table_reference = {
+     joined_table
+  |  table_factor
+  }
+
+table_reference_list = {
+    table_reference ~ (comma ~ table_reference)*
+  }
+
+table_row_value_expression = {
+    row_value_special_case
+  | row_value_constructor
+  }
+
+table_scope = {
+    global_or_local ~ ^"TEMPORARY"
+  }
+
+table_subquery = {
+    subquery
+  }
+
+table_value_constructor = {
+    ^"VALUES" ~ row_value_expression_list
+  }
+
+table_value_constructor_by_query = {
+    ^"TABLE" ~ table_subquery
+  }
+
+target_array_element_specification = {
+    target_array_reference ~ left_bracket_or_trigraph ~
+    simple_value_specification ~ right_bracket_or_trigraph
+  }
+
+target_array_reference = {
+    SQL_parameter_reference
+  | column_reference
+  }
+
+target_character_set_specification = {
+    character_set_specification
+  }
+
+target_data_type = {
+    data_type
+  }
+
+target_descriptor_name = {
+    PTF_descriptor_name
+  }
+
+target_specification = {
+    host_parameter_specification
+  | SQL_parameter_reference
+  | column_reference
+  | target_array_element_specification
+  | dynamic_parameter_specification
+  | embedded_variable_specification
+  }
+
+target_subtype = {
+    path_resolved_user_defined_type_name
+  | reference_type
+  }
+
+target_table = {
+    table_name
+  | ^"ONLY" ~ left_paren ~ table_name ~ right_paren
+  }
+
+temporary_table_declaration = {
+    ^"DECLARE" ~ ^"LOCAL" ~ ^"TEMPORARY" ~ ^"TABLE" ~ table_name ~ table_element_list ~
+    ( ^"ON" ~ ^"COMMIT" ~ table_commit_action ~ ^"ROWS" )?
+  }
+
+term = {
+    factor ~ ( (asterisk | solidus) ~ term)?
+  }
+
+time_fractional_seconds_precision = {
+    unsigned_integer
+  }
+
+time_interval = {
+    hours_value ~ ( colon ~ minutes_value ~ ( colon ~ seconds_value )? )?
+  | minutes_value ~ ( colon ~ seconds_value )?
+  | seconds_value
+  }
+
+time_literal = {
+    ^"TIME" ~ time_string
+  }
+
+time_precision = {
+    time_fractional_seconds_precision
+  }
+
+time_string = @{
+    quote ~ unquoted_time_string ~ quote
+  }
+
+time_value = @{
+    hours_value ~ colon ~ minutes_value ~ colon ~ seconds_value
+  }
+
+time_zone = {
+    ^"AT" ~ time_zone_specifier
+  }
+
+time_zone_field = {
+    ^"TIMEZONE_HOUR"
+  | ^"TIMEZONE_MINUTE"
+  }
+
+time_zone_interval = {
+    sign ~ hours_value ~ colon ~ minutes_value
+  }
+
+time_zone_specifier = {
+    ^"LOCAL"
+  | ^"TIME" ~ ^"ZONE" ~ interval_primary
+  }
+
+timestamp_generation_rule = {
+    ^"GENERATED" ~ ^"ALWAYS"
+  }
+
+timestamp_literal = {
+    ^"TIMESTAMP" ~ timestamp_string
+  }
+
+timestamp_precision = {
+    time_fractional_seconds_precision
+  }
+
+timestamp_string = @{
+    quote ~ unquoted_timestamp_string ~ quote
+  }
+
+to_sql = {
+    ^"TO" ~ ^"SQL" ~ ^"WITH" ~ to_sql_function
+  }
+
+to_sql_function = {
+    specific_routine_designator
+  }
+
+token = {
+    nondelimiter_token
+  | delimiter_token
+  }
+
+transaction_access_mode = {
+    ^"READ" ~ ^"ONLY"
+  | ^"READ" ~ ^"WRITE"
+  }
+
+transaction_characteristics = {
+    ( transaction_mode ~ (comma ~ transaction_mode)* )?
+  }
+
+transaction_mode = {
+    isolation_level
+  | transaction_access_mode
+  | diagnostics_size
+  }
+
+transcoding = {
+    ^"CONVERT" ~ left_paren ~ character_value_expression ~ ^"USING" ~ transcoding_name ~
+    right_paren
+  }
+
+transcoding_name = {
+    schema_qualified_name
+  }
+
+transform_definition = {
+    ^"CREATE" ~ ( ^"TRANSFORM" | ^"TRANSFORMS" ) ~ ^"FOR" ~ schema_resolved_user_defined_type_name ~
+    transform_group+
+  }
+
+transform_element = {
+    to_sql
+  | from_sql
+  }
+
+transform_element_list = {
+    transform_element ~ ( comma ~ transform_element )?
+  }
+
+transform_group = {
+    group_name ~ left_paren ~ transform_element_list ~ right_paren
+  }
+
+transform_group_characteristic = {
+    ^"DEFAULT" ~ ^"TRANSFORM" ~ ^"GROUP" ~ value_specification
+  | ^"TRANSFORM" ~ ^"GROUP" ~ ^"FOR" ~ ^"TYPE" ~ path_resolved_user_defined_type_name ~ value_specification
+  }
+
+transform_group_element = {
+    group_name
+  }
+
+transform_group_specification = {
+    ^"TRANSFORM" ~ ^"GROUP" ~
+    ( single_group_specification | multiple_group_specification )
+  }
+
+transform_kind = {
+    ^"TO" ~ ^"SQL"
+  | ^"FROM" ~ ^"SQL"
+  }
+
+transforms_to_be_dropped = {
+    ^"ALL"
+  | transform_group_element
+  }
+
+transition_table_name = {
+    identifier
+  }
+
+transition_table_or_variable = {
+    ^"OLD" ~ ( ^"ROW" )? ~ ( ^"AS" )? ~ old_transition_variable_name
+  | ^"NEW" ~ ( ^"ROW" )? ~ ( ^"AS" )? ~ new_transition_variable_name
+  | ^"OLD" ~ ^"TABLE" ~ ( ^"AS" )? ~ old_transition_table_name
+  | ^"NEW" ~ ^"TABLE" ~ ( ^"AS" )? ~ new_transition_table_name
+  }
+
+transition_table_or_variable_list = {
+    transition_table_or_variable+
+  }
+
+transliteration_definition = {
+    ^"CREATE" ~ ^"TRANSLATION" ~ transliteration_name ~ ^"FOR" ~
+    source_character_set_specification ~ ^"TO" ~
+    target_character_set_specification ~ ^"FROM" ~ transliteration_source
+  }
+
+transliteration_name = {
+    schema_qualified_name
+  }
+
+transliteration_routine = {
+    specific_routine_designator
+  }
+
+transliteration_source = {
+    existing_transliteration_name
+  | transliteration_routine
+  }
+
+trigger_action_time = {
+    ^"BEFORE"
+  | ^"AFTER"
+  | ^"INSTEAD" ~ ^"OF"
+  }
+
+trigger_column_list = {
+    column_name_list
+  }
+
+trigger_definition = {
+    ^"CREATE" ~ ^"TRIGGER" ~ trigger_name ~ trigger_action_time ~ trigger_event ~ ^"ON" ~
+    table_name ~ ( ^"REFERENCING" ~ transition_table_or_variable_list )? ~
+    triggered_action
+  }
+
+trigger_event = {
+    ^"INSERT"
+  | ^"DELETE"
+  | ^"UPDATE" ~ ( ^"OF" ~ trigger_column_list )?
+  }
+
+trigger_name = {
+    schema_qualified_name
+  }
+
+triggered_SQL_statement = {
+    SQL_procedure_statement
+  | ^"BEGIN" ~ ^"ATOMIC" ~ ( SQL_procedure_statement ~ semicolon )+ ~ ^"END"
+  }
+
+triggered_action = {
+    ( ^"FOR" ~ ^"EACH" ~ ( ^"ROW" | ^"STATEMENT" ) )? ~ ( triggered_when_clause )? ~
+    triggered_SQL_statement
+  }
+
+triggered_when_clause = {
+    ^"WHEN" ~ left_paren ~ search_condition ~ right_paren
+  }
+
+trigonometric_function = {
+    trigonometric_function_name ~ left_paren ~ numeric_value_expression ~
+    right_paren
+  }
+
+trigonometric_function_name = {
+    ^"SIN"
+  | ^"COS"
+  | ^"TAN"
+  | ^"SINH"
+  | ^"COSH"
+  | ^"TANH"
+  | ^"ASIN"
+  | ^"ACOS"
+  | ^"ATAN"
+  }
+
+trim_array_function = {
+    ^"TRIM_ARRAY" ~ left_paren ~ array_value_expression ~ comma ~
+    numeric_value_expression ~ right_paren
+  }
+
+trim_character = {
+    character_value_expression
+  }
+
+trim_function = {
+    ^"TRIM" ~ left_paren ~ trim_operands ~ right_paren
+  }
+
+trim_octet = {
+    binary_value_expression
+  }
+
+trim_operands = {
+    ( ( trim_specification )? ~ ( trim_character )? ~ ^"FROM" )? ~ trim_source
+  }
+
+trim_source = {
+    character_value_expression
+  }
+
+trim_specification = {
+    ^"LEADING"
+  | ^"TRAILING"
+  | ^"BOTH"
+  }
+
+truncate_table_statement = {
+    ^"TRUNCATE" ~ ^"TABLE" ~ target_table ~ ( identity_column_restart_option )?
+  }
+
+truth_value = {
+    ^"TRUE"
+  | ^"FALSE"
+  | ^"UNKNOWN"
+  }
+
+type_list = {
+    user_defined_type_specification ~
+    (comma ~ user_defined_type_specification)*
+  }
+
+type_predicate = {
+    row_value_predicand ~ type_predicate_part_2
+  }
+
+type_predicate_part_2 = {
+    ^"IS" ~ ( ^"NOT" )? ~ ^"OF" ~ left_paren ~ type_list ~ right_paren
+  }
+
+typed_table_clause = {
+    ^"OF" ~ path_resolved_user_defined_type_name ~ ( subtable_clause )? ~
+    ( typed_table_element_list )?
+  }
+
+typed_table_element = {
+    column_options
+  | table_constraint_definition
+  | self_referencing_column_specification
+  }
+
+typed_table_element_list = {
+    left_paren ~ typed_table_element ~ (comma ~ typed_table_element)* ~ right_paren
+  }
+
+underscore = {
+    "_"
+  }
+
+unique_column_list = {
+    column_name_list
+  }
+
+unique_constraint_definition = {
+    unique_specification ~ left_paren ~ unique_column_list ~ ( comma ~ without_overlap_specification )? ~ right_paren
+  | ^"UNIQUE" ~ ( ^"VALUE" )
+  }
+
+unique_predicate = {
+    ^"UNIQUE" ~ table_subquery
+  }
+
+unique_specification = {
+    ^"UNIQUE"
+  | ^"PRIMARY" ~ ^"KEY"
+  }
+
+unqualified_schema_name = {
+    identifier
+  }
+
+unquoted_date_string = {
+    date_value
+  }
+
+unquoted_interval_string = @{
+    ( sign )? ~ ( year_month_literal | day_time_literal )
+  }
+
+unquoted_time_string = @{
+    time_value ~ ( time_zone_interval )?
+  }
+
+unquoted_timestamp_string = @{
+    unquoted_date_string ~ space ~ unquoted_time_string
+  }
+
+unsigned_integer = @{
+    digit+
+  }
+
+unsigned_literal = {
+    unsigned_numeric_literal
+  | general_literal
+  }
+
+unsigned_numeric_literal = {
+    exact_numeric_literal
+  | approximate_numeric_literal
+  }
+
+unsigned_value_specification = {
+    unsigned_literal
+  | general_value_specification
+  }
+
+updatability_clause = {
+    ^"FOR" ~ ( (^"READ" ~ ^"ONLY") | (^"UPDATE" ~ ( ^"OF" ~ column_name_list )?) )
+  }
+
+update_rule = {
+    ^"ON" ~ ^"UPDATE" ~ referential_action
+  }
+
+update_source = {
+    value_expression
+  | contextually_typed_value_specification
+  }
+
+update_statement_positioned = {
+    ^"UPDATE" ~ target_table ~ ( ( ^"AS" )? ~ correlation_name )? ~ ^"SET" ~ set_clause_list ~
+    ^"WHERE" ~ ^"CURRENT" ~ ^"OF" ~ cursor_name
+  }
+
+update_statement_searched = {
+    ^"UPDATE" ~ target_table ~
+    ( ^"FOR" ~ ^"PORTION" ~ ^"OF" ~ application_time_period_name ~ ^"FROM" ~ point_in_time_1 ~ ^"TO" ~ point_in_time_2 )? ~
+    ( ( ^"AS" )? ~ correlation_name )? ~ ^"SET" ~ set_clause_list ~
+    ( ^"WHERE" ~ search_condition )?
+  }
+
+update_target = {
+    object_column
+  | object_column ~ left_bracket_or_trigraph ~ simple_value_specification ~ right_bracket_or_trigraph
+  }
+
+upper_limit = {
+    comma ~ ( high_value )?
+  }
+
+user_identifier = {
+    identifier
+  }
+
+user_defined_cast_definition = {
+    ^"CREATE" ~ ^"CAST" ~ left_paren ~ source_data_type ~ ^"AS" ~ target_data_type ~
+    right_paren ~ ^"WITH" ~ cast_function ~ ( ^"AS" ~ ^"ASSIGNMENT" )?
+  }
+
+user_defined_character_set_name = {
+    character_set_name
+  }
+
+user_defined_ordering_definition = {
+    ^"CREATE" ~ ^"ORDERING" ~ ^"FOR" ~ schema_resolved_user_defined_type_name ~ ordering_form
+  }
+
+user_defined_representation = {
+    ^"REF" ~ ^"USING" ~ predefined_type
+  }
+
+user_defined_type_body = {
+    schema_resolved_user_defined_type_name ~ ( subtype_clause )? ~
+    ( ^"AS" ~ representation )? ~ ( user_defined_type_option_list )? ~
+    ( method_specification_list )?
+  }
+
+user_defined_type_definition = {
+    ^"CREATE" ~ ^"TYPE" ~ user_defined_type_body
+  }
+
+user_defined_type_name = {
+    ( schema_name ~ period )? ~ qualified_identifier
+  }
+
+user_defined_type_option = {
+    instantiable_clause
+  | finality
+  | reference_type_specification
+  | cast_to_ref
+  | cast_to_type
+  | cast_to_distinct
+  | cast_to_source
+  }
+
+user_defined_type_option_list = {
+    user_defined_type_option ~ ( user_defined_type_option )*
+  }
+
+user_defined_type_specification = {
+    inclusive_user_defined_type_specification
+  | exclusive_user_defined_type_specification
+  }
+
+user_defined_type_value_expression = {
+    value_expression_primary
+  }
+
+using_argument = {
+    general_value_specification
+  }
+
+using_arguments = {
+    ^"USING" ~ using_argument ~ (comma ~ using_argument)*
+  }
+
+using_descriptor = {
+    ^"USING" ~ ( ^"SQL" )? ~ ^"DESCRIPTOR" ~ descriptor_name
+  }
+
+using_input_descriptor = {
+    using_descriptor
+  }
+
+value_expression = {
+    common_value_expression
+  | boolean_value_expression
+  | row_value_expression
+  }
+
+value_expression_primary = {
+    left_paren? ~ nonparenthesized_value_expression_primary ~ right_paren?
+  }
+
+value_specification = {
+    literal
+  | general_value_specification
+  }
+
+value_of_default_value = {
+    value_expression
+  }
+
+value_of_expression_at_row = {
+    ^"VALUE_OF" ~ left_paren ~ value_expression ~ ^"AT" ~ row_marker_expression ~
+    ( comma ~ value_of_default_value )? ~ right_paren
+  }
+
+vertical_bar = {
+    "|"
+  }
+
+view_column_list = {
+    column_name_list
+  }
+
+view_column_option = {
+    column_name ~ ^"WITH" ~ ^"OPTIONS" ~ scope_clause
+  }
+
+view_definition = {
+    ^"CREATE" ~ ( ^"RECURSIVE" )? ~ ^"VIEW" ~ table_name ~ view_specification ~ ^"AS" ~
+    query_expression ~ ( ^"WITH" ~ ( levels_clause )? ~ ^"CHECK" ~ ^"OPTION" )?
+  }
+
+view_element = {
+    self_referencing_column_specification
+  | view_column_option
+  }
+
+view_element_list = {
+    left_paren ~ view_element ~ (comma ~ view_element)* ~ right_paren
+  }
+
+view_specification = {
+    regular_view_specification
+  | referenceable_view_specification
+  }
+
+when_operand = {
+    row_value_predicand
+  | comparison_predicate_part_2
+  | between_predicate_part_2
+  | in_predicate_part_2
+  | character_like_predicate_part_2
+  | octet_like_predicate_part_2
+  | similar_predicate_part_2
+  | regex_like_predicate_part_2
+  | null_predicate_part_2
+  | quantified_comparison_predicate_part_2
+  | normalized_predicate_part_2
+  | match_predicate_part_2
+  | overlaps_predicate_part_2
+  | distinct_predicate_part_2
+  | member_predicate_part_2
+  | submultiset_predicate_part_2
+  | set_predicate_part_2
+  | type_predicate_part_2
+  }
+
+when_operand_list = {
+    when_operand ~ (comma ~ when_operand)*
+  }
+
+where_clause = {
+    ^"WHERE" ~ search_condition
+  }
+
+WHITESPACE = _{ WHITE_SPACE }
+
+width_bucket_bound_1 = {
+    numeric_value_expression
+  }
+
+width_bucket_bound_2 = {
+    numeric_value_expression
+  }
+
+width_bucket_count = {
+    numeric_value_expression
+  }
+
+width_bucket_function = {
+    ^"WIDTH_BUCKET" ~ left_paren ~ width_bucket_operand ~ comma ~
+    width_bucket_bound_1 ~ comma ~ width_bucket_bound_2 ~ comma ~
+    width_bucket_count ~ right_paren
+  }
+
+width_bucket_operand = {
+    numeric_value_expression
+  }
+
+window_clause = {
+    ^"WINDOW" ~ window_definition_list
+  }
+
+window_definition = {
+    new_window_name ~ ^"AS" ~ window_specification
+  }
+
+window_definition_list = {
+    window_definition ~ (comma ~ window_definition)*
+  }
+
+window_frame_between = {
+    ^"BETWEEN" ~ window_frame_bound_1 ~ ^"AND" ~ window_frame_bound_2
+  }
+
+window_frame_bound = {
+    window_frame_start
+  | ^"UNBOUNDED" ~ ^"FOLLOWING"
+  | window_frame_following
+  }
+
+window_frame_bound_1 = {
+    window_frame_bound
+  }
+
+window_frame_bound_2 = {
+    window_frame_bound
+  }
+
+window_frame_clause = {
+    ( row_pattern_measures )? ~ window_frame_units ~ window_frame_extent ~
+    ( window_frame_exclusion )? ~ ( row_pattern_common_syntax )?
+  }
+
+window_frame_exclusion = {
+    ^"EXCLUDE" ~ ^"CURRENT" ~ ^"ROW"
+  | ^"EXCLUDE" ~ ^"GROUP"
+  | ^"EXCLUDE" ~ ^"TIES"
+  | ^"EXCLUDE" ~ ^"NO" ~ ^"OTHERS"
+  }
+
+window_frame_extent = {
+    window_frame_start
+  | window_frame_between
+  }
+
+window_frame_following = {
+    unsigned_value_specification ~ ^"FOLLOWING"
+  }
+
+window_frame_preceding = {
+    unsigned_value_specification ~ ^"PRECEDING"
+  }
+
+window_frame_start = {
+    ^"UNBOUNDED" ~ ^"PRECEDING"
+  | window_frame_preceding
+  | ^"CURRENT" ~ ^"ROW"
+  }
+
+window_frame_units = {
+    ^"ROWS"
+  | ^"RANGE"
+  | ^"GROUPS"
+  }
+
+window_function = {
+    window_function_type ~ ^"OVER" ~ window_name_or_specification
+  }
+
+window_function_type = {
+    rank_function_type ~ left_paren ~ right_paren
+  | ^"ROW_NUMBER" ~ left_paren ~ right_paren
+  | aggregate_function
+  | ntile_function
+  | lead_or_lag_function
+  | first_or_last_value_function
+  | nth_value_function
+  | window_row_pattern_measure
+  }
+
+window_name = {
+    identifier
+  }
+
+window_name_or_specification = {
+    window_name
+  | in_line_window_specification
+  }
+
+window_order_clause = {
+    ^"ORDER" ~ ^"BY" ~ sort_specification_list
+  }
+
+window_partition_clause = {
+    ^"PARTITION" ~ ^"BY" ~ window_partition_column_reference_list
+  }
+
+window_partition_column_reference = {
+    column_reference ~ ( collate_clause )?
+  }
+
+window_partition_column_reference_list = {
+    window_partition_column_reference ~
+    (comma ~ window_partition_column_reference)*
+  }
+
+window_row_pattern_measure = {
+    measure_name
+  }
+
+window_specification = {
+    left_paren ~ window_specification_details ~ right_paren
+  }
+
+window_specification_details = {
+    ( existing_window_name )? ~ ( window_partition_clause )? ~
+    ( window_order_clause )? ~ ( window_frame_clause )?
+  }
+
+with_clause = {
+    ^"WITH" ~ ( ^"RECURSIVE" )? ~ with_list
+  }
+
+with_column_list = {
+    column_name_list
+  }
+
+with_list = {
+    with_list_element ~ (comma ~ with_list_element)*
+  }
+
+with_list_element = {
+    query_name ~ ( left_paren ~ with_column_list ~ right_paren )? ~ ^"AS" ~
+    table_subquery ~ ( search_or_cycle_clause )?
+  }
+
+with_or_without_data = {
+    ^"WITH" ~ ^"NO" ~ ^"DATA"
+  | ^"WITH" ~ ^"DATA"
+  }
+
+with_or_without_time_zone = {
+    ^"WITH" ~ ^"TIME" ~ ^"ZONE"
+  | ^"WITHOUT" ~ ^"TIME" ~ ^"ZONE"
+  }
+
+within_group_specification = {
+    ^"WITHIN" ~ ^"GROUP" ~ left_paren ~ ^"ORDER" ~ ^"BY" ~ sort_specification_list ~ right_paren
+  }
+
+without_overlap_specification = {
+    application_time_period_name ~ ^"WITHOUT" ~ ^"OVERLAPS"
+  }
+
+year_month_literal = {
+    years_value ~ ( minus_sign ~ months_value )?
+  | months_value
+  }
+
+years_value = {
+    datetime_value
+  }

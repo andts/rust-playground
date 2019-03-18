@@ -1,0 +1,6 @@
+[package]
+name = "bigfile"
+version = "0.1.0"
+authors = ["Andrew Tsvielodub <a.tsvelodub@gmail.com>"]
+
+[dependencies]

@@ -1,0 +1,1432 @@
+//------------------------------------------------------------------------------
+// Basic Symbols
+//------------------------------------------------------------------------------
+
+sql_language_character = { simple_latin_letter | digit | sql_special_character }
+
+simple_latin_letter = { ASCII_ALPHA }
+
+simple_latin_upper_case_letter = { ASCII_ALPHA_UPPER }
+
+digit = { ASCII_DIGIT }
+
+sql_special_character =
+    {   space
+	|	double_quote
+	|	percent
+	|	ampersand
+	|	quote
+	|	left paren
+	|	right paren
+	|	asterisk
+	|	plus sign
+	|	comma
+	|	minus sign
+	|	period
+	|	solidus
+	|	colon
+	|	semicolon
+	|	less than operator
+	|	equals operator
+	|	greater than operator
+	|	question mark
+	|	left bracket
+	|	right bracket
+	|	circumflex
+	|	underscore
+	|	vertical bar
+	|	left brace
+	|	right brace
+	}
+
+space                   = { WHITE_SPACE }
+double_quote            = { "\"" }
+percent                 = { "%" }
+ampersand               = { "&" }
+quote                   = { "'" }
+left_paren              = { "(" }
+right_paren             = { ")" }
+asterisk                = { "*" }
+plus_sign               = { "+" }
+comma                   = { "," }
+minus_sign              = { "-" }
+period                  = { "." }
+solidus                 = { "/" }
+colon                   = { ":" }
+semicolon               = { ";" }
+less_than_operator      = { "<" }
+equals_operator         = { "=" }
+greater_than_operator   = { ">" }
+question_mark           = { "?" }
+left_bracket            = { "[" }
+right_bracket           = { "]" }
+circumflex              = { "^" }
+underscore              = { "_" }
+vertical_bar            = { "|" }
+left_brace              = { "{" }
+right_brace             = { "}" }
+
+//------------------------------------------------------------------------------
+// Literal Numbers, Strings, Dates and Times
+//------------------------------------------------------------------------------
+
+identifier = { actual_identifier }
+
+actual_identifier = { regular_identifier | delimited_identifier }
+
+regular_identifier = { identifier_body } 
+
+identifier_body = { identifier_start ~ identifier_part* }
+
+identifier_start = { initial_alphabetic_character | ideographic_character }
+
+initial_alphabetic_character = { ALPHABETIC }
+
+ideographic_character = { IDEOGRAPHIC }
+
+identifier_part ::=
+		alphabetic_character
+	|	ideographic_character
+	|	<decimal digit character>
+	|	<identifier combining character>
+	|	<underscore>
+	|	<alternate underscore>
+	|	<extender character>
+	|	<identifier ignorable character>
+	|	<connector character>
+
+alphabetic_character ::= { ALPHABETIC }
+
+<decimal digit character> ::= !! (See the Syntax Rules)
+
+<identifier combining character> ::= !! (See the Syntax Rules)
+
+<alternate underscore> ::= !! (See the Syntax Rules)
+
+<extender character> ::= !! (See the Syntax Rules)
+
+<identifier ignorable character> ::= !! (See the Syntax Rules)
+
+<connector character> ::= !! (See the Syntax Rules)
+
+delimited_identifier ::= double_quote delimited_identifier_body double_quote
+
+delimited_identifier_body ::= { delimited_identifier_part* }
+
+delimited_identifier_part ::= <nondoublequote character> | <doublequote symbol>
+
+<nondoublequote character> ::= !! (See the Syntax Rules)
+
+--p
+--small
+--i
+Note that the two successive double quote characters must have no other
+character (such as a space) between them.
+The lexical analyzer would normally deal with this sort of issue.
+--/i
+--/small
+--/p
+
+<doublequote symbol> ::= double_quote double_quote
+
+character_set_specification =
+	{	standard_character_set_name
+	|	implementation_defined_character_set_name
+	|	user_defined_character_set_name
+	}
+
+standard_character_set_name = { character_set_name }
+
+character_set_name = { (schema_name ~ period)? ~ sql_language_identifier }
+
+schema_name = { (catalog_name ~ period)? ~ unqualified_schema_name }
+
+catalog_name = { identifier }
+
+unqualified_schema_name = { identifier }
+
+sql_language_identifier = {
+        sql_language_identifier_start ~ (underscore | sql_language_identifier_part)*
+    }
+
+sql_language_identifier_start = { simple_latin_letter }
+
+sql_language_identifier_part = { simple_latin_letter | digit }
+
+implementation_defined_character_set_name = { character_set_name }
+
+user_defined_character_set_name = { character_set_name }
+
+user_defined_type = { user_defined_type_name }
+
+user_defined_type_name = { schema_qualified_type_name }
+
+schema_qualified_type_name = { (schema_name ~ period)?  ~ qualified_identifier }
+
+qualified_identifier = { identifier }
+
+temporary_table_declaration = {
+        "DECLARE" ~ "LOCAL" ~ "TEMPORARY" ~ "TABLE" ~ table_name ~
+        table_element_list ~
+        ("ON" ~ "COMMIT" ~ table_commit_action ~ "ROWS")?
+    }
+
+table_commit_action = { "PRESERVE" | "DELETE" }
+
+table_name = { local_or_schema_qualified_name }
+
+local_or_schema_qualified_name = { (local_or_schema_qualifier ~ period)? ~ qualified_identifier }
+
+local_or_schema_qualifier = { schema_name | "MODULE" }
+
+table_element_list = {
+		left_paren ~ table_element ~ (comma ~ table_element)* ~ right_paren
+    }
+
+//? maybe throw away?
+table_element ::=
+		column_definition
+	|	<table constraint definition>
+	|	<like clause>
+	|	<self-referencing column specification>
+	|	<column options>
+
+column_definition ::=
+		<column name>
+		{ data_type | <domain name> }
+		[ <reference scope check> ]
+		[ <default clause> ]
+		[ <column constraint definition>... ]
+		[ <collate clause> ]
+
+<column name> ::= identifier
+
+//------------------------------------------------------------------------------
+// Data Types
+//------------------------------------------------------------------------------
+
+data_type =
+    {   predefined_type
+	|	row_type
+	|	user_defined_type
+	|	reference_type
+	|	collection_type
+	}
+
+predefined_type =
+	{	character_string_type (CHARACTER SET character_set_specification)?
+	|	national_character_string_type
+	|	binary_large_object_string_type
+	|	bit_string_type
+	|	numeric_type
+	|	boolean_type
+	|	datetime_type
+	|	interval_type
+	}
+
+character_string_type ::=
+	{	CHARACTER [ left_paren length right_paren ]
+	|	CHAR [ left_paren length right_paren ]
+	|	CHARACTER VARYING left_paren length right_paren
+	|	CHAR VARYING left_paren length right_paren
+	|	VARCHAR left_paren length right_paren
+	|	CHARACTER LARGE OBJECT [ left_paren large_object_length right_paren ]
+	|	CHAR LARGE OBJECT [ left_paren large_object_length right_paren ]
+	|	CLOB [ left_paren large_object_length right_paren ]
+	}
+
+length = { unsigned_integer }
+
+unsigned_integer = { digit* }
+
+large_object_length = { (unsigned_integer ~ multiplier?) | large_object_length_token }
+
+multiplier = { "K" | "M" | "G" }
+
+large_object_length_token = { digit+ ~ multiplier }
+
+national_character_string_type ::=
+		NATIONAL CHARACTER [ left_paren length right_paren ]
+	|	NATIONAL CHAR [ left_paren length right_paren ]
+	|	NCHAR [ left_paren length right_paren ]
+	|	NATIONAL CHARACTER VARYING left_paren length right_paren
+	|	NATIONAL CHAR VARYING left_paren length right_paren
+	|	NCHAR VARYING left_paren length right_paren
+	|	NATIONAL CHARACTER LARGE OBJECT [ left_paren large_object_length right_paren ]
+	|	NCHAR LARGE OBJECT [ left_paren large_object_length right_paren ]
+	|	NCLOB [ left_paren large_object_length right_paren ]
+
+binary_large_object_string_type ::=
+		BINARY LARGE OBJECT [ left_paren large_object_length right_paren ]
+	|	BLOB [ left_paren large_object_length right_paren ]
+
+bit_string_type ::=
+		BIT [ left_paren length right_paren ]
+	|	BIT VARYING left_paren length right_paren
+
+numeric_type ::= <exact numeric type> | <approximate numeric type>
+
+<exact numeric type> ::=
+		NUMERIC [ left_paren <precision> [ <comma> <scale> ] right_paren ]
+	|	DECIMAL [ left_paren <precision> [ <comma> <scale> ] right_paren ]
+	|	DEC [ left_paren <precision> [ <comma> <scale> ] right_paren ]
+	|	INTEGER
+	|	INT
+	|	SMALLINT
+
+<precision> ::= unsigned_integer
+
+<scale> ::= unsigned_integer
+
+<approximate numeric type> ::=
+		FLOAT [ left_paren <precision> right_paren ]
+	|	REAL
+	|	DOUBLE PRECISION
+
+boolean_type ::= BOOLEAN
+
+datetime_type ::=
+		DATE
+	|	TIME [ left_paren <time precision> right_paren ] [ <with or without time zone> ]
+	|	TIMESTAMP [ left_paren <timestamp precision> right_paren ] [ <with or without time zone> ]
+
+<time precision> ::= <time fractional seconds precision>
+
+<time fractional seconds precision> ::= unsigned_integer
+
+<with or without time zone> ::= WITH TIME ZONE | WITHOUT TIME ZONE
+
+<timestamp precision> ::= <time fractional seconds precision>
+
+interval_type ::= INTERVAL <interval qualifier>
+
+<interval qualifier> ::= <start field> TO <end field> | <single datetime field>
+
+<start field> ::=
+		<non-second primary datetime field> [ left_paren <interval leading field precision> right_paren ]
+
+<non-second primary datetime field> ::= YEAR | MONTH | DAY | HOUR | MINUTE
+
+<interval leading field precision> ::= unsigned_integer
+
+<end field> ::=
+		<non-second primary datetime field>
+	|	SECOND [ left_paren <interval fractional seconds precision> right_paren ]
+
+<interval fractional seconds precision> ::= unsigned_integer
+
+<single datetime field> ::=
+		<non-second primary datetime field> [ left_paren <interval leading field precision> right_paren ]
+	|	SECOND [ left_paren <interval leading field precision> [ <comma> <interval fractional seconds precision> ] right_paren ]
+
+row_type ::= ROW <row type body>
+
+<row type body> ::= left_paren <field definition> ( <comma> <field definition>)* right_paren
+
+<field definition> ::= <field name> data_type [ <reference scope check> ] [ <collate clause> ]
+
+<field name> ::= identifier
+
+<reference scope check> ::=
+		REFERENCES ARE [ NOT ] CHECKED [ ON DELETE <reference scope check action> ]
+
+<reference scope check action> ::= <referential action>
+
+<referential action> ::=
+		CASCADE
+	|	SET NULL
+	|	SET DEFAULT
+	|	RESTRICT
+	|	NO ACTION
+
+<collate clause> ::= COLLATE <collation name>
+
+<collation name> ::= <schema qualified name>
+
+<schema qualified name> ::= [ schema_name period ] qualified_identifier
+
+reference_type ::= REF left_paren <referenced type> right_paren [ <scope clause> ]
+
+<referenced type> ::= user_defined_type
+
+<scope clause> ::= SCOPE table_name
+
+collection_type ::= data_type <array specification>
+
+<array specification> ::=
+		<collection type constructor> <left bracket or trigraph> unsigned_integer <right bracket or trigraph>
+
+<collection type constructor> ::= ARRAY
+
+<left bracket or trigraph> ::= <left bracket> | <left bracket trigraph>
+
+--p
+--small
+--i
+The trigraphs are strictly sequences of characters, not sequences of tokens.
+There may not be any spaces between the characters.
+Normally, the lexical analyzer would return the trigraphs as a simple symbol.
+--/i
+--/small
+--/p
+
+<left bracket trigraph> ::= <question mark> <question mark> left_paren
+
+<right bracket or trigraph> ::= <right bracket> | <right bracket trigraph>
+
+<right bracket trigraph> ::= <question mark> <question mark> right_paren
+
+<domain name> ::= <schema qualified name>
+
+<default clause> ::= DEFAULT <default option>
+
+<default option> ::=
+		<literal>
+	|	<datetime value function>
+	|	USER
+	|	CURRENT_USER
+	|	CURRENT_ROLE
+	|	SESSION_USER
+	|	SYSTEM_USER
+	|	CURRENT_PATH
+	|	<implicitly typed value specification>
+
+//------------------------------------------------------------------------------
+// Literals
+//------------------------------------------------------------------------------
+
+<literal> ::= <signed numeric literal> | <general literal>
+
+<signed numeric literal> ::= [ <sign> ] <unsigned numeric literal>
+
+<sign> ::= <plus sign> | <minus sign>
+
+<unsigned numeric literal> ::= <exact numeric literal> | <approximate numeric literal>
+
+<exact numeric literal> ::=
+		unsigned_integer [ period [ unsigned_integer ] ]
+	|	period unsigned_integer
+
+<approximate numeric literal> ::= <mantissa> E <exponent>
+
+<mantissa> ::= <exact numeric literal>
+
+<exponent> ::= <signed integer>
+
+<signed integer> ::= [ <sign> ] unsigned_integer
+
+<general literal> ::=
+		<character string literal>
+	|	<national character string literal>
+	|	<bit string literal>
+	|	<hex string literal>
+	|	<binary string literal>
+	|	<datetime literal>
+	|	<interval literal>
+	|	<boolean literal>
+
+<character string literal> ::=
+		[ <introducer> ~ character_set_specification ]
+		<quote> [ <character representation>... ] <quote>
+		( <separator> <quote> [ <character representation>... ] <quote>)*
+
+<introducer> ::= <underscore>
+
+<character representation> ::= <nonquote character> | <quote symbol>
+
+<nonquote character> ::= !! (See the Syntax Rules.)
+
+--p
+--small
+--i
+The <quote symbol> rule consists of two immediately adjacent <quote>
+marks with no spaces.
+As usual, this would be best handled in the lexical analyzer, not in the
+grammar.
+--/i
+--/small
+--/p
+
+<quote symbol> ::= <quote><quote>
+
+<separator> ::= { <comment> | <white space> }...
+
+<comment> ::= <simple comment> | <bracketed comment>
+
+<simple comment> ::= <simple comment introducer> [ <comment character>... ] <newline>
+
+<simple comment introducer> ::= <minus sign><minus sign> [ <minus sign>... ]
+
+<comment character> ::= <nonquote character> | <quote>
+
+<newline> ::= !! (See the Syntax Rules)
+
+--p
+--small
+--i
+The <bracketed comment> rule included '!! (See the Syntax Rules)'.
+This probably says something about the <slash> <asterisk> and <asterisk>
+<slash> needing to be adjacent characters rather than adjacent tokens.
+--/i
+--/small
+--/p
+
+<bracketed comment> ::=
+		<bracketed comment introducer> <bracketed comment contents> <bracketed comment terminator>
+
+<bracketed comment introducer> ::= <slash> <asterisk>
+
+<bracketed comment contents> ::= ( <comment character> | <separator>)*
+
+<bracketed comment terminator> ::= <asterisk> <slash>
+
+<white space> ::= !! (See the Syntax Rules)
+
+<national character string literal> ::=
+		N <quote> [ <character representation>... ] <quote>
+		( <separator> <quote> [ <character representation>... ] <quote>)*
+
+<bit string literal> ::=
+		B <quote> [ <bit>... ] <quote>
+		( <separator> <quote> [ <bit>... ] <quote>)*
+
+<bit> ::= 0 | 1
+
+<hex string literal> ::=
+		X <quote> [ <hexit>... ] <quote>
+		( <separator> <quote> [ <hexit>... ] <quote>)*
+
+<hexit> ::= digit | A | B | C | D | E | F | a | b | c | d | e | f
+
+<binary string literal> ::=
+		X <quote> ( <hexit> <hexit>)* <quote>
+		( <separator> <quote> ( <hexit> <hexit>)* <quote>)*
+
+<datetime literal> ::= <date literal> | <time literal> | <timestamp literal>
+
+<date literal> ::= DATE <date string>
+
+<date string> ::= <quote> <unquoted date string> <quote>
+
+<unquoted date string> ::= <date value>
+
+<date value> ::= <years value> <minus sign> <months value> <minus sign> <days value>
+
+<years value> ::= <datetime value>
+
+<datetime value> ::= unsigned_integer
+
+<months value> ::= <datetime value>
+
+<days value> ::= <datetime value>
+
+<time literal> ::= TIME <time string>
+
+<time string> ::= <quote> <unquoted time string> <quote>
+
+<unquoted time string> ::= <time value> [ <time zone interval> ]
+
+<time value> ::= <hours value> <colon> <minutes value> <colon> <seconds value>
+
+<hours value> ::= <datetime value>
+
+<minutes value> ::= <datetime value>
+
+<seconds value> ::= <seconds integer value> [ period [ <seconds fraction> ] ]
+
+<seconds integer value> ::= unsigned_integer
+
+<seconds fraction> ::= unsigned_integer
+
+<time zone interval> ::= <sign> <hours value> <colon> <minutes value>
+
+<timestamp literal> ::= TIMESTAMP <timestamp string>
+
+<timestamp string> ::= <quote> <unquoted timestamp string> <quote>
+
+<unquoted timestamp string> ::= <unquoted date string> space <unquoted time string>
+
+<interval literal> ::= INTERVAL [ <sign> ] <interval string> <interval qualifier>
+
+<interval string> ::= <quote> <unquoted interval string> <quote>
+
+<unquoted interval string> ::= [ <sign> ] { <year-month literal> | <day-time literal> }
+
+<year-month literal> ::= <years value> | [ <years value> <minus sign> ] <months value>
+
+<day-time literal> ::= <day-time interval> | <time interval>
+
+<day-time interval> ::=
+		<days value> [ space <hours value> [ <colon> <minutes value> [ <colon> <seconds value> ] ] ]
+
+<time interval> ::=
+		<hours value> [ <colon> <minutes value> [ <colon> <seconds value> ] ]
+	|	<minutes value> [ <colon> <seconds value> ]
+	|	<seconds value>
+
+<boolean literal> ::= TRUE | FALSE | UNKNOWN
+
+<datetime value function> ::=
+		<current date value function>
+	|	<current time value function>
+	|	<current timestamp value function>
+	|	<current local time value function>
+	|	<current local timestamp value function>
+
+<current date value function> ::= CURRENT_DATE
+
+<current time value function> ::=
+		CURRENT_TIME [ left_paren <time precision> right_paren ]
+
+<current timestamp value function> ::=
+		CURRENT_TIMESTAMP [ left_paren <timestamp precision> right_paren ]
+
+<current local time value function> ::=
+		LOCALTIME [ left_paren <time precision> right_paren ]
+
+<current local timestamp value function> ::=
+		LOCALTIMESTAMP [ left_paren <timestamp precision> right_paren ]
+
+<implicitly typed value specification> ::= <null specification> | <empty specification>
+
+<null specification> ::= NULL
+
+<empty specification> ::= ARRAY <left bracket or trigraph> <right bracket or trigraph>
+
+//------------------------------------------------------------------------------
+// Search Condition
+//------------------------------------------------------------------------------
+
+<search condition> ::= <boolean value expression>
+
+<boolean value expression> ::=
+		<boolean term>
+	|	<boolean value expression> OR <boolean term>
+
+<boolean term> ::=
+		<boolean factor>
+	|	<boolean term> AND <boolean factor>
+
+<boolean factor> ::= [ NOT ] <boolean test>
+
+<boolean test> ::= <boolean primary> [ IS [ NOT ] <truth value> ]
+
+<boolean primary> ::=
+		<predicate>
+	|	<parenthesized boolean value expression>
+	|	<nonparenthesized value expression primary>
+
+<predicate> ::=
+		<comparison predicate>
+	|	<between predicate>
+	|	<in predicate>
+	|	<like predicate>
+	|	<null predicate>
+	|	<quantified comparison predicate>
+	|	<exists predicate>
+	|	<unique predicate>
+	|	<match predicate>
+	|	<overlaps predicate>
+	|	<similar predicate>
+	|	<distinct predicate>
+	|	<type predicate>
+
+<comparison predicate> ::= <row value expression> <comp op> <row value expression>
+
+<row value expression> ::= <row value special case> | <row value constructor>
+
+<row value special case> ::= <value specification> | <value expression>
+
+<value specification> ::= <literal> | <general value specification>
+
+<general value specification> ::=
+		<host parameter specification>
+	|	<SQL parameter reference>
+	|	<SQL variable reference>
+	|	<dynamic parameter specification>
+	|	<embedded variable specification>
+	|	CURRENT_DEFAULT_TRANSFORM_GROUP
+	|	CURRENT_PATH
+	|	CURRENT_ROLE
+	|	CURRENT_TRANSFORM_GROUP_FOR_TYPE user_defined_type
+	|	CURRENT_USER
+	|	SESSION_USER
+	|	SYSTEM_USER
+	|	USER
+	|	VALUE
+
+<host parameter specification> ::= <host parameter name> [ <indicator parameter> ]
+
+<host parameter name> ::= <colon> identifier
+
+<indicator parameter> ::= [ INDICATOR ] <host parameter name>
+
+<SQL parameter reference> ::= <basic identifier chain>
+
+<basic identifier chain> ::= <identifier chain>
+
+<identifier chain> ::= identifier ( period identifier)*
+
+<value expression> ::=
+		<numeric value expression>
+	|	<string value expression>
+	|	<datetime value expression>
+	|	<interval value expression>
+	|	<boolean value expression>
+	|	<user-defined type value expression>
+	|	<row value expression>
+	|	<reference value expression>
+	|	<collection value expression>
+
+<numeric value expression> ::=
+		<term>
+	|	<numeric value expression> <plus sign> <term>
+	|	<numeric value expression> <minus sign> <term>
+
+<term> ::=
+		<factor>
+	|	<term> <asterisk> <factor>
+	|	<term> <solidus> <factor>
+
+<factor> ::= [ <sign> ] <numeric primary>
+
+<numeric primary> ::=
+		<value expression primary>
+	|	<numeric value function>
+
+<value expression primary> ::=
+		<parenthesized value expression>
+	|	<nonparenthesized value expression primary>
+
+<parenthesized value expression> ::= left_paren <value expression> right_paren
+
+<nonparenthesized value expression primary> ::=
+		<unsigned value specification>
+	|	<column reference>
+	|	<set function specification>
+	|	scalar_subquery
+	|	<case expression>
+	|	<cast specification>
+	|	<subtype treatment>
+	|	<attribute or method reference>
+	|	<reference resolution>
+	|	<collection value constructor>
+	|	<routine invocation>
+	|	<field reference>
+	|	<element reference>
+	|	<method invocation>
+	|	<static method invocation>
+	|	<new specification>
+
+<unsigned value specification> ::= <unsigned literal> | <general value specification>
+
+<unsigned literal> ::= <unsigned numeric literal> | <general literal>
+
+<column reference> ::=
+		<basic identifier chain>
+	|	MODULE period qualified_identifier period <column name>
+
+<set function specification> ::=
+		COUNT left_paren <asterisk> right_paren
+	|	<general set function>
+	|	<grouping operation>
+
+<general set function> ::=
+		<set function type> left_paren [ set_quantifier ] <value expression> right_paren
+
+<set function type> ::= computational_operation
+
+computational_operation = { "AVG" | "MAX" | "MIN" | "SUM" | "EVERY" | "ANY" | "SOME" | "COUNT" }
+
+set_quantifier = { "DISTINCT" | "ALL" }
+
+<grouping operation> ::= GROUPING left_paren <column reference> right_paren
+
+//------------------------------------------------------------------------------
+// Queries
+//------------------------------------------------------------------------------
+
+scalar_subquery = { subquery }
+
+subquery = { left_paren ~ query_expression ~ right_paren }
+
+query_expression = { (with_clause)? ~ query_expression_body }
+
+with_clause = { "WITH" ~ "RECURSIVE"? ~ with_list }
+
+with_list = { with_list_element ~ (comma ~ with_list_element)* }
+
+with_list_element =
+    {
+		query_name ~
+		(left_paren ~ with_column_list ~ right_paren)? ~
+		"AS" ~ left_paren ~ query_expression ~ right_paren ~
+		(<search or cycle clause>)?
+    }
+
+query_name = { identifier }
+
+with_column_list = { column_name_list }
+
+<search or cycle clause> ::=
+		<search clause>
+	|	<cycle clause>
+	|	<search clause> <cycle clause>
+
+<search clause> ::=
+		SEARCH <recursive search order> SET <sequence column>
+
+<recursive search order> ::=
+		DEPTH FIRST BY <sort specification list>
+	|	BREADTH FIRST BY <sort specification list>
+
+<sort specification list> ::= <sort specification> ( <comma> <sort specification>)*
+
+--p
+--small
+--i <sort specification> modified per ISO 9075:1999/Cor.1:2000(E)
+--/i
+--/small
+--/p
+
+<sort specification> ::= <sort key> [ <ordering specification> ]
+
+<sort key> ::= <value expression>
+
+<ordering specification> ::= ASC | DESC
+
+<sequence column> ::= <column name>
+
+<cycle clause> ::=
+		CYCLE <cycle column list>
+		SET <cycle mark column> TO <cycle mark value>
+		DEFAULT <non-cycle mark value>
+		USING <path column>
+
+<cycle column list> ::= <cycle column> ( <comma> <cycle column>)*
+
+<cycle column> ::= <column name>
+
+<cycle mark column> ::= <column name>
+
+<cycle mark value> ::= <value expression>
+
+<non-cycle mark value> ::= <value expression>
+
+<path column> ::= <column name>
+
+query_expression_body ::= <non-join query expression> | <joined table>
+
+<non-join query expression> ::=
+		<non-join query term>
+	|	query_expression_body UNION  [ ALL | DISTINCT ] [ <corresponding spec> ] <query term>
+	|	query_expression_body EXCEPT [ ALL | DISTINCT ] [ <corresponding spec> ] <query term>
+
+<non-join query term> ::=
+		<non-join query primary>
+	|	<query term> INTERSECT [ ALL | DISTINCT ] [ <corresponding spec> ] <query primary>
+
+<non-join query primary> ::=
+		<simple table>
+	|	left_paren <non-join query expression> right_paren
+
+<simple table> ::= <query specification> | <table value constructor> | explicit_table
+
+<query specification> ::= SELECT [ set_quantifier ] <select list> <table expression>
+
+<select list> ::= <asterisk> | <select sublist> ( <comma> <select sublist>)*
+
+<select sublist> ::= <derived column> | <qualified asterisk>
+
+<derived column> ::= <value expression> [ <as clause> ]
+
+<as clause> ::= [ AS ] <column name>
+
+<qualified asterisk> ::=
+		<asterisked identifier chain> period <asterisk>
+	|	<all fields reference>
+
+<asterisked identifier chain> ::= <asterisked identifier> ( period <asterisked identifier>)*
+
+<asterisked identifier> ::= identifier
+
+<all fields reference> ::= <value expression primary> period <asterisk>
+
+<table expression> ::= <from clause> [ <where clause> ] [ <group by clause> ] [ <having clause> ]
+
+<from clause> ::= FROM <table reference list>
+
+<table reference list> ::= <table reference> ( <comma> <table reference>)*
+
+<table reference> ::= <table primary> | <joined table>
+
+<table primary> ::=
+		<table or query name> [ [ AS ] <correlation name> [ left_paren <derived column list> right_paren ] ]
+	|	<derived table> [ AS ] <correlation name> [ left_paren <derived column list> right_paren ]
+	|	<lateral derived table> [ AS ] <correlation name> [ left_paren <derived column list> right_paren ]
+	|	<collection derived table> [ AS ] <correlation name> [ left_paren <derived column list> right_paren ]
+	|	<only spec> [ [ AS ] <correlation name> [ left_paren <derived column list> right_paren ] ]
+	|	left_paren <joined table> right_paren
+
+<table or query name> ::= table_name | query_name
+
+<correlation name> ::= identifier
+
+<derived column list> ::= column_name_list
+
+<derived table> ::= <table subquery>
+
+<table subquery> ::= subquery
+
+<lateral derived table> ::= LATERAL left_paren query_expression right_paren
+
+<collection derived table> ::=
+		UNNEST left_paren <collection value expression> right_paren [ WITH ORDINALITY ]
+
+<collection value expression> ::= <value expression primary>
+
+<only spec> ::= ONLY left_paren <table or query name> right_paren
+
+<joined table> ::= <cross join> | <qualified join> | <natural join> | <union join>
+
+<cross join> ::= <table reference> CROSS JOIN <table primary>
+
+<qualified join> ::= <table reference> [ <join type> ] JOIN <table reference> <join specification>
+
+<join type> ::= INNER | <outer join type> [ OUTER ]
+
+<outer join type> ::= LEFT | RIGHT | FULL
+
+<join specification> ::= <join condition> | <named columns join>
+
+<join condition> ::= ON <search condition>
+
+<named columns join> ::= USING left_paren <join column list> right_paren
+
+<join column list> ::= column_name_list
+
+<natural join> ::= <table reference> NATURAL [ <join type> ] JOIN <table primary>
+
+<union join> ::= <table reference> UNION JOIN <table primary>
+
+<where clause> ::= WHERE <search condition>
+
+--p
+--small
+--i Rules from <group by clause> to <grouping set> modified per ISO 9075:1999/Cor.1:2000(E)
+--/i
+--/small
+--/p
+
+<group by clause> ::= GROUP BY <grouping element list>
+
+<grouping element list> ::= <grouping element> ( <comma> <grouping element>)*
+
+<grouping element> ::=
+		<ordinary grouping set>
+	|	<rollup list>
+	|	<cube list>
+	|	<grouping sets specification>
+	|	<grand total>
+
+<grouping column reference> ::= <column reference> [ <collate clause> ]
+
+<rollup list> ::= ROLLUP left_paren <grouping column reference list> right_paren
+
+<grouping column reference list> ::=
+		<grouping column reference> ( <comma> <grouping column reference>)*
+
+<cube list> ::= CUBE left_paren <grouping column reference list> right_paren
+
+<grouping sets specification> ::= GROUPING SETS left_paren <grouping set list> right_paren
+
+<grouping set list> ::= <grouping set> ( <comma> <grouping set>)*
+
+<grouping set> ::=
+		<ordinary grouping set>
+	|	<rollup list>
+	|	<cube list>
+	|	<grouping sets specification>
+	|	<grand total>
+
+<ordinary grouping set> ::=
+		<grouping column reference>
+	|	left_paren <grouping column reference list> right_paren
+
+<grand total> ::= left_paren right_paren
+
+<concatenated grouping> ::= <grouping set> <comma> <grouping set list>
+
+<having clause> ::= "HAVING" ~ <search condition>
+
+<table value constructor> ::= "VALUES" ~ <row value expression list>
+
+<row value expression list> ::= <row value expression> ( <comma> <row value expression>)*
+
+explicit_table = { "TABLE" ~ table_name }
+
+//------------------------------------------------------------------------------
+// Query expression components
+//------------------------------------------------------------------------------
+
+<query term> ::= <non-join query term> | <joined table>
+
+<corresponding spec> ::=
+		CORRESPONDING [ BY left_paren <corresponding column list> right_paren ]
+
+<corresponding column list> ::= column_name_list
+
+<query primary> ::= <non-join query primary> | <joined table>
+
+<case expression> ::= <case abbreviation> | <case specification>
+
+<case abbreviation> ::=
+		NULLIF left_paren <value expression> <comma> <value expression> right_paren
+	|	COALESCE left_paren <value expression> { <comma> <value expression> }... right_paren
+
+<case specification> ::= <simple case> | <searched case>
+
+<simple case> ::= CASE <case operand> <simple when clause>... [ <else clause> ] END
+
+<case operand> ::= <value expression>
+
+<simple when clause> ::= WHEN <when operand> THEN <result>
+
+<when operand> ::= <value expression>
+
+<result> ::= <result expression> | NULL
+
+<result expression> ::= <value expression>
+
+<else clause> ::= ELSE <result>
+
+<searched case> ::= CASE <searched when clause>... [ <else clause> ] END
+
+<searched when clause> ::= WHEN <search condition> THEN <result>
+
+<cast specification> ::= CAST left_paren <cast operand> AS <cast target> right_paren
+
+<cast operand> ::= <value expression> | <implicitly typed value specification>
+
+<cast target> ::= <domain name> | data_type
+
+--p
+--small
+--i <subtype treatment> to <target subtype> modified per ISO 9075:1999/Cor.1:2000(E)
+--/i
+--/small
+--/p
+
+<subtype treatment> ::=
+		TREAT left_paren <subtype operand> AS <target subtype> right_paren
+
+<subtype operand> ::= <value expression>
+
+<target subtype> ::= user_defined_type
+
+<attribute or method reference> ::=
+		<value expression primary> <dereference operator> qualified_identifier
+		[ <SQL argument list> ]
+
+<dereference operator> ::= <right arrow>
+
+<right arrow> ::= ->
+
+<SQL argument list> ::=
+		left_paren [ <SQL argument> ( <comma> <SQL argument>)* ] right_paren
+
+<SQL argument> ::= <value expression> | <generalized expression> | <target specification>
+
+<generalized expression> ::= <value expression> AS user_defined_type
+
+<target specification> ::=
+		<host parameter specification>
+	|	<SQL parameter reference>
+	|	<column reference>
+	|	<SQL variable reference>
+	|	<dynamic parameter specification>
+	|	<embedded variable specification>
+
+<reference resolution> ::= DEREF left_paren <reference value expression> right_paren
+
+<reference value expression> ::= <value expression primary>
+
+<collection value constructor> ::= <array value expression>
+
+<array value expression> ::= <array value constructor> | <array concatenation> | <value expression primary>
+
+<array value constructor> ::= <array value list constructor>
+
+<array value list constructor> ::=
+		ARRAY <left bracket or trigraph> <array element list> <right bracket or trigraph>
+
+<array element list> ::= <array element> ( <comma> <array element>)*
+
+<array element> ::= <value expression>
+
+<array concatenation> ::=
+		<array value expression 1> <concatenation operator> <array value expression 2>
+
+<array value expression 1> ::= <array value expression>
+
+<concatenation operator> ::= ||
+
+<array value expression 2> ::= <array value expression>
+
+<routine invocation> ::= <routine name> <SQL argument list>
+
+<routine name> ::= [ schema_name period ] qualified_identifier
+
+<field reference> ::= <value expression primary> period <field name>
+
+<element reference> ::=
+		<array value expression> <left bracket or trigraph> <numeric value expression> <right bracket or trigraph>
+
+<method invocation> ::= <direct invocation> | <generalized invocation>
+
+<direct invocation> ::=
+		<value expression primary> period <method name> [ <SQL argument list> ]
+
+<method name> ::= identifier
+
+<generalized invocation> ::=
+		left_paren <value expression primary>
+		AS data_type right_paren period <method name>
+		[ <SQL argument list> ]
+
+--p
+--small
+--i It is not remotely clear why this was needed in this grammar.
+--/i
+--i <constructor method selection> added per ISO 9075:1999/Cor.1:2000(E)
+--/i
+--/small
+--/p
+
+<constructor method selection> ::= <routine invocation>
+
+<static method invocation> ::=
+		user_defined_type <double colon> <method name> [ <SQL argument list> ]
+
+--p
+--small
+--i
+Note that <double colon> must be a pair of characters with no
+intervening space, not a pair of colon symbols separated by arbitrary
+white space.
+Normally, the lexical analyzer would return <double colon> as a symbol.
+--/i
+--/small
+--/p
+
+<double colon> ::= <colon> <colon>
+
+<new specification> ::= NEW <routine invocation>
+
+<numeric value function> ::=
+		<position expression>
+	|	<extract expression>
+	|	<length expression>
+	|	<cardinality expression>
+	|	<absolute value expression>
+	|	<modulus expression>
+
+<position expression> ::= <string position expression> | <blob position expression>
+
+<string position expression> ::=
+		POSITION left_paren <string value expression> IN <string value expression> right_paren
+
+<string value expression> ::= <character value expression> | <bit value expression> | <blob value expression>
+
+<character value expression> ::= <concatenation> | <character factor>
+
+<concatenation> ::= <character value expression> <concatenation operator> <character factor>
+
+<character factor> ::= <character primary> [ <collate clause> ]
+
+<character primary> ::= <value expression primary> | <string value function>
+
+<string value function> ::= <character value function> | <blob value function> | <bit value function>
+
+<character value function> ::=
+		<character substring function>
+	|	<regular expression substring function>
+	|	<fold>
+	|	<form-of-use conversion>
+	|	<character translation>
+	|	<trim function>
+	|	<character overlay function>
+	|	<specific type method>
+
+<character substring function> ::=
+		SUBSTRING left_paren <character value expression> FROM <start position>
+		[ FOR <string length> ] right_paren
+
+<start position> ::= <numeric value expression>
+
+<string length> ::= <numeric value expression>
+
+--p
+--small
+--i <regular expression substring function> modified per ISO 9075:1999/Cor.1:2000(E)
+--/i
+--/small
+--/p
+
+<regular expression substring function> ::=
+		SUBSTRING left_paren <character value expression> SIMILAR
+		<character value expression> ESCAPE <escape character> right_paren
+
+<escape character> ::= <character value expression>
+
+<fold> ::= { UPPER | LOWER } left_paren <character value expression> right_paren
+
+<form-of-use conversion> ::=
+		CONVERT left_paren <character value expression>
+		USING <form-of-use conversion name> right_paren
+
+<form-of-use conversion name> ::= <schema qualified name>
+
+<character translation> ::=
+		TRANSLATE left_paren <character value expression>
+		USING <translation name> right_paren
+
+<translation name> ::= <schema qualified name>
+
+<trim function> ::= TRIM left_paren <trim operands> right_paren
+
+<trim operands> ::= [ [ <trim specification> ] [ <trim character> ] FROM ] <trim source>
+
+<trim specification> ::= LEADING | TRAILING | BOTH
+
+<trim character> ::= <character value expression>
+
+<trim source> ::= <character value expression>
+
+<character overlay function> ::=
+		OVERLAY left_paren <character value expression> PLACING <character value expression>
+		FROM <start position> [ FOR <string length> ] right_paren
+
+<specific type method> ::= <user-defined type value expression> period SPECIFICTYPE
+
+<user-defined type value expression> ::= <value expression primary>
+
+<blob value function> ::= <blob substring function> | <blob trim function> | <blob overlay function>
+
+<blob substring function> ::=
+		SUBSTRING left_paren <blob value expression> FROM <start position>
+		[ FOR <string length> ] right_paren
+
+<blob value expression> ::= <blob concatenation> | <blob factor>
+
+<blob concatenation> ::= <blob value expression> <concatenation operator> <blob factor>
+
+<blob factor> ::= <blob primary>
+
+<blob primary> ::= <value expression primary> | <string value function>
+
+<blob trim function> ::= TRIM left_paren <blob trim operands> right_paren
+
+<blob trim operands> ::= [ [ <trim specification> ] [ <trim octet> ] FROM ] <blob trim source>
+
+<trim octet> ::= <blob value expression>
+
+<blob trim source> ::= <blob value expression>
+
+<blob overlay function> ::=
+		OVERLAY left_paren <blob value expression> PLACING <blob value expression>
+		FROM <start position> [ FOR <string length> ] right_paren
+
+<bit value function> ::= <bit substring function>
+
+<bit substring function> ::=
+		SUBSTRING left_paren <bit value expression> FROM <start position>
+		[ FOR <string length> ] right_paren
+
+<bit value expression> ::= <bit concatenation> | <bit factor>
+
+<bit concatenation> ::= <bit value expression> <concatenation operator> <bit factor>
+
+<bit factor> ::= <bit primary>
+
+<bit primary> ::= <value expression primary> | <string value function>
+
+<blob position expression> ::=
+		POSITION left_paren <blob value expression> IN <blob value expression> right_paren
+
+<extract expression> ::=
+		EXTRACT left_paren <extract field> FROM <extract source> right_paren
+
+<extract field> ::= <primary datetime field> | <time zone field>
+
+<primary datetime field> ::= <non-second primary datetime field> | SECOND
+
+<time zone field> ::= TIMEZONE_HOUR | TIMEZONE_MINUTE
+
+<extract source> ::= <datetime value expression> | <interval value expression>
+
+<datetime value expression> ::=
+		<datetime term>
+	|	<interval value expression> <plus sign> <datetime term>
+	|	<datetime value expression> <plus sign> <interval term>
+	|	<datetime value expression> <minus sign> <interval term>
+
+<interval term> ::=
+		<interval factor>
+	|	<interval term 2> <asterisk> <factor>
+	|	<interval term 2> <solidus> <factor>
+	|	<term> <asterisk> <interval factor>
+
+<interval factor> ::= [ <sign> ] <interval primary>
+
+--@@ This definition of interval primary is superceded by the version from 9075-5 SQL/Bindings
+--@@ <interval primary> ::= <value expression primary> | <interval value function>
+
+<interval value function> ::= <interval absolute value function>
+
+<interval absolute value function> ::= ABS left_paren <interval value expression> right_paren
+
+<interval value expression> ::=
+		<interval term>
+	|	<interval value expression 1> <plus sign> <interval term 1>
+	|	<interval value expression 1> <minus sign> <interval term 1>
+	|	left_paren <datetime value expression> <minus sign>
+		<datetime term> right_paren <interval qualifier>
+
+<interval value expression 1> ::= <interval value expression>
+
+<interval term 1> ::= <interval term>
+
+<datetime term> ::= <datetime factor>
+
+<datetime factor> ::= <datetime primary> [ <time zone> ]
+
+<datetime primary> ::= <value expression primary> | <datetime value function>
+
+<time zone> ::= AT <time zone specifier>
+
+<time zone specifier> ::= LOCAL | TIME ZONE <interval primary>
+
+<interval term 2> ::= <interval term>
+
+<length expression> ::= <char length expression> | <octet length expression> | <bit length expression>
+
+<char length expression> ::=
+		{ CHAR_LENGTH | CHARACTER_LENGTH } left_paren <string value expression> right_paren
+
+<octet length expression> ::=
+		OCTET_LENGTH left_paren <string value expression> right_paren
+
+<bit length expression> ::=
+		BIT_LENGTH left_paren <string value expression> right_paren
+
+<cardinality expression> ::=
+		CARDINALITY left_paren <collection value expression> right_paren
+
+<absolute value expression> ::=
+		ABS left_paren <numeric value expression> right_paren
+
+<modulus expression> ::=
+		MOD left_paren <numeric value expression dividend> <comma> <numeric value expression divisor>right_paren
+
+<numeric value expression dividend> ::= <numeric value expression>
+
+<numeric value expression divisor> ::= <numeric value expression>
+
+<row value constructor> ::=
+		<row value constructor element>
+	|	[ ROW ] left_paren <row value constructor element list> right_paren
+	|	<row subquery>
+
+<row value constructor element> ::= <value expression>
+
+<row value constructor element list> ::=
+		<row value constructor element> ( <comma> <row value constructor element>)*
+
+<row subquery> ::= subquery
+
+<comp op> ::=
+		<equals operator>
+	|	<not equals operator>
+	|	<less than operator>
+	|	<greater than operator>
+	|	<less than or equals operator>
+	|	<greater than or equals operator>
+
+--p
+--small
+--i
+The <not equals>, <less than or equals operator> and <greater than or
+equals operator> should be handled by the lexical analyzer as token
+symbols, not by the grammar.
+As usual, spaces are not allowed between the two characters.
+--/i
+--/small
+--/p
+
+<not equals operator> ::= <less than operator> <greater than operator>
+
+<less than or equals operator> ::= <less than operator> <equals operator>
+
+<greater than or equals operator> ::= <greater than operator> <equals operator>
+
+<between predicate> ::=
+		<row value expression> [ NOT ] BETWEEN [ ASYMMETRIC | SYMMETRIC ]
+		<row value expression> AND <row value expression>
+
+<in predicate> ::= <row value expression> [ NOT ] IN <in predicate value>
+
+<in predicate value> ::= <table subquery> | left_paren <in value list> right_paren
+
+--p
+--small
+--i Previously, the expression in curly braces was not in square brackets.
+--/i
+--i Consequently, every <in value list> had to have at least two items in it.
+--/i
+--/small
+--/p
+
+<in value list> ::= <row value expression> ( <comma> <row value expression>)*
+
+<like predicate> ::= <character like predicate> | <octet like predicate>
+
+<character like predicate> ::=
+		<character match value> [ NOT ] LIKE <character pattern> [ ESCAPE <escape character> ]
+
+<character match value> ::= <character value expression>
+
+<character pattern> ::= <character value expression>
+
+<octet like predicate> ::=
+		<octet match value> [ NOT ] LIKE <octet pattern> [ ESCAPE <escape octet> ]
+
+<octet match value> ::= <blob value expression>
+
+<octet pattern> ::= <blob value expression>
+
+<escape octet> ::= <blob value expression>
+
+<null predicate> ::= <row value expression> IS [ NOT ] NULL
+
+<quantified comparison predicate> ::= <row value expression> <comp op> <quantifier> <table subquery>
+
+<quantifier> ::= <all> | <some>
+
+<all> ::= ALL
+
+<some> ::= SOME | ANY
+
+<exists predicate> ::= EXISTS <table subquery>
+
+<unique predicate> ::= UNIQUE <table subquery>
+
+<match predicate> ::=
+		<row value expression> MATCH [ UNIQUE ] [ SIMPLE | PARTIAL | FULL ]
+		<table subquery>
+
+<overlaps predicate> ::= <row value expression 1> OVERLAPS <row value expression 2>
+
+<row value expression 1> ::= <row value expression>
+
+<row value expression 2> ::= <row value expression>

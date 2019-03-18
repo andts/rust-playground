@@ -1,0 +1,47 @@
+expr = {
+    join
+}
+
+WHITESPACE = _{ " " }
+
+table = @{
+    !("inner" | "cross" | "join") ~ ASCII_ALPHA+
+}
+
+join = {
+    inner_join | cross_join
+}
+
+inner_join = {
+    (table | join) ~ "inner" ~ "join" ~ table
+}
+
+cross_join = {
+    (table | join) ~ "cross" ~ "join" ~ table
+}
+//---------------------
+expr = {
+    SOI ~ join_expr ~ EOI
+}
+
+WHITESPACE = _{ " " }
+
+table = @{
+    !("inner" | "cross" | "join") ~ ASCII_ALPHANUMERIC+
+}
+
+join_expr = {
+    join
+}
+
+join = _{
+	left_join | right_join
+}
+
+left_join = {
+    table ~ "left" ~ "join" ~ table
+}
+
+right_join = {
+    "right" ~ "join" ~ table
+}

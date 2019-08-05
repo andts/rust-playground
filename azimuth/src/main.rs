@@ -1,9 +1,13 @@
-use optimum::logical_node::*;
+use azimuth::expressions;
+use azimuth::expressions::{ExpressionNode, ExpressionTree, LiteralValue};
+use azimuth::logical_node::*;
 
 fn main() {
-    let a: Expression = Column {
+    let a = Column {
         alias: String::from("col1"),
-        expression:
-    }
-
+        expression: ExpressionTree {
+            expr: expressions::lit_node("hello"),
+            children: vec![],
+        },
+    };
 }

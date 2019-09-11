@@ -1,3 +1,5 @@
+use crate::logical_node::RelationTree;
+
 pub enum ExpressionKind {
     RowLevel,
     Aggregate,
@@ -11,10 +13,18 @@ pub enum LiteralValue {
     DateTime(chrono::NaiveDateTime),
 }
 
+//can the tree be typed by the return type of the expr node?
 #[derive(Clone)]
 pub struct ExpressionTree {
     pub expr: ExpressionNode,
     pub children: Vec<ExpressionTree>,
+}
+
+impl ExpressionTree {
+    //todo use arrow data types here
+    pub fn get_type() -> String {
+        unimplemented!()
+    }
 }
 
 #[derive(Clone)]
@@ -28,7 +38,7 @@ pub enum ExpressionNode {
         return_type: String,
     },
     ColumnRef {
-        column_name: String,
+        column_index: u32,
         data_type: String,
     },
     Array {
@@ -43,14 +53,36 @@ pub enum ExpressionNode {
     },
 }
 
-pub fn lit(string: &str) -> LiteralValue {
+fn lit_value(string: &str) -> LiteralValue {
     LiteralValue::String(String::from(string))
 }
 
-pub fn lit_node(string: &str) -> ExpressionNode {
+fn lit_node(string: &str) -> ExpressionNode {
     ExpressionNode::Literal {
-        value: lit(string),
+        value: lit_value(string),
         data_type: String::from("String"),
+    }
+}
+
+pub fn lit(string: &str) -> ExpressionTree {
+    ExpressionTree {
+        expr: lit_node(string),
+        children: vec![],
+    }
+}
+
+pub fn col_ref(idx: u32, rel: &RelationTree) -> ExpressionTree {
+    let input_row_type = rel.get_row_type();
+    let column_type = input_row_type
+        .get(idx as usize)
+        //todo add rel in message
+        .expect(format!("Column with index {} not found in rel", idx).as_str());
+    ExpressionTree {
+        expr: ExpressionNode::ColumnRef {
+            column_index: idx,
+            data_type: column_type.clone(),
+        },
+        children: vec![],
     }
 }
 

@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use crate::expressions::ExpressionTree;
-use chrono::{TimeZone, Utc};
 
 pub mod standard_nodes;
 
@@ -12,11 +11,23 @@ pub struct Column {
 }
 
 pub trait RelationalNode {
-    fn get_inputs(&self) -> Vec<&dyn RelationalNode>;
-    fn get_relation_definition(&self) -> RelationDefinition;
+    fn get_relation_definition(&self, input: &Vec<RelationTree>) -> RelationDefinition;
 }
 
 pub struct RelationDefinition {
-    columns: Vec<Column>,
-    physical_properties: Vec<String>,
+    //todo replace with data types
+    pub row_type: Vec<String>,
+    pub physical_properties: HashSet<String>,
+}
+
+pub struct RelationTree {
+    pub node: Box<dyn RelationalNode>,
+    pub children: Vec<RelationTree>,
+}
+
+impl RelationTree {
+    ///return vector of types of columns
+    pub fn get_row_type(&self) -> Vec<String> {
+        self.node.get_relation_definition(&self.children).row_type
+    }
 }

@@ -107,16 +107,13 @@ pub fn scan_csv(file_name: &str) -> RelationTree {
     let columns = headers
         .into_iter()
         .map(|header| {
-            let header_elements: Vec<&str> = header.split(":").collect();
+            let header_elements: Vec<&str> = header.split(':').collect();
             ColumnDef {
-                name: header_elements
-                    .get(0)
-                    .expect("Column header not found")
-                    .to_string(),
+                name: (*header_elements.get(0).expect("Column header not found")).to_string(),
                 data_type: header_elements
                     .get(1)
-                    .map(|s| s.to_string())
-                    .unwrap_or("string".to_string()),
+                    .map(|s| (*s).to_string())
+                    .unwrap_or_else(|| "string".to_string()),
             }
         })
         .collect();
